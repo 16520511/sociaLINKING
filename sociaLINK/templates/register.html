@@ -1,0 +1,34 @@
+{% extends 'login_layout.html' %}
+
+{% block content %}
+
+<div class="right-content">
+    <h2>Register A New SociaLINK Account</h2>
+    <form method="post">
+        {% csrf_token %}
+        <div class="form-error">
+            {{ regForm.non_field_errors|striptags }}
+        </div>
+        <table>
+            {% for field in regForm %}  
+                <tr><td>{{ field.label }}</td>
+                <td style="padding-bottom:5px">{{ field }}</td></tr>
+                <div class="form-error">
+                        {{ field.errors|striptags }}
+                </div>
+            {% endfor %}
+            <tr><td>
+                <input class="btn" type="submit" value="Register">
+            </td></tr>
+        </table>
+    </form>
+    <p class="redirect">Already have an account? Login now!</p>
+</div>
+<script>
+    $(document).ready(() => {
+        $(".redirect").click(() => {
+            window.location.href = "{% url 'default_login' %}";
+        });
+    });
+</script>
+{% endblock %}

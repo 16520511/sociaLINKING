@@ -1,0 +1,20 @@
+<!DOCTYPE HTML>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<html>
+<head>
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+    {% load static %}
+    <link rel="stylesheet" type="text/css" href="{% static 'css/layout.css' %}">
+    <title>SociaLINK</title>
+</head> 
+    <body>
+        <ul class="navbar">
+            <li><a href="{% url 'user_logout' %}">Logout</a></li>
+            <li><a>Hello, {{ request.user.get_full_name }}</a></li>
+        </ul>
+        <div class="content">
+            {% block content %}
+            {% endblock %}
+        </div>
+    </body>
+</html>

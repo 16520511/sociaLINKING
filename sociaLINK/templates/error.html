@@ -1,0 +1,12 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+<style>
+    .content {
+        text-align: center;
+    }
+</style>
+{% load static %}
+    <h3>{{ errorMessage }}!</h3>
+    <a href="{% url 'home' %}">Back to Home</a>
+{% endblock %}

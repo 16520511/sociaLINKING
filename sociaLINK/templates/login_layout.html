@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+{% load static %}
+<link rel="stylesheet" type="text/css" href="{% static 'css/login_layout.css' %}">
+
+<html>
+<div class="content">
+    <div class="left-intro">
+            <p id="intro-text">Welcome To SociaLINK</p>
+            <img src="{% static 'images/intro-logo.png' %}" width="200px">
+    </div>
+
+    <div class="right-intro">
+        {% block content %}
+        {% endblock %}
+    </div>
+</div>
+
+<!-- #region Script -->
+
+<script>
+    $(document).ready(() => {
+        // Adjusting the positions of elements responsively
+        let windowWidth = $(window).width();
+        let windowHeight = $(window).height();
+
+        let content = $(".content");
+        content.width(windowWidth);
+        content.height(windowHeight);
+
+        //Smart phone device
+        if (windowWidth < windowHeight) {
+            console.log(windowWidth, windowHeight)
+            $(".left-intro").css("display", "none");
+            content.css("display", "initial");
+        }
+
+        else {
+            let introText = $("#intro-text");
+            let introImg = $(".left-intro img");
+            introText.css({"margin-top": `${(windowHeight - introText.height())/2 - 10}px`});
+            introImg.css({"bottom": `${windowHeight/2 + introText.height()/2 + 10}px`, "left": `${(introImg.parent().width() - introImg.width())/2}px`});
+
+            let table = $("table");
+            let rightContent = $(".right-content");
+
+            table.css({"margin-left": `${(table.parent().width() - table.width())/2}px`});
+            rightContent.css({"margin-top": `${(windowHeight - rightContent.height())/2}px`});
+        }
+
+        let table = $("table");
+        let rightContent = $(".right-content");
+
+        table.css({"margin-left": `${(table.parent().width() - table.width())/2}px`});
+        rightContent.css({"margin-top": `${(windowHeight - rightContent.height())/2}px`});
+    });
+</script>
+<!-- #endregion -->
+</html>
