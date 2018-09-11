@@ -2,5 +2,50 @@
 
 {% block content %}
 {% load static %}
+<link rel="stylesheet" type="text/css" href="{% static 'css/partial-post-section.css' %}">
+<link rel="stylesheet" type="text/css" href="{% static 'css/user_page.css' %}">
 
+<div class="container">
+    <div class="header-cover">
+        <img class="cover-image" src="{{ user.profile.cover.url }}">
+    </div>
+    <div class="left">
+        <div class="header-avatar">
+            <img class="avatar-image" src="{{ user.profile.avatar.url }}">
+            <h2>{{ user.get_full_name }}</h2>
+            <p>Gender: {{ user.gender }}</p>
+            <p>Age: {{ user.age }}</p>
+        </div>
+    </div>
+    <div class="middle">
+        <ins class="statistic">Followers: {{ followers }}, Followings: {{ followings }}</ins>
+    <!--Post Section-->     
+        {% include 'partial-post-section.html' %}
+    </div>
+
+    <div class="right">
+    </div>
+</div>
+
+<script>
+    let numberOfLoad = 1;
+    $(document).ready(() => {
+        strimContent();
+
+        //let avatarImage = $(".avatar-image");
+        //avatarImage.css("margin-top", `${($(".cover-image").height() - avatarImage.height())/2}px`);
+    });
+
+    //FUCNTION SECTION
+    //Strim all white spaces at the start and end of content
+    function strimContent() {
+        $(".post-content").each((index, value) => {
+            let content = $(".post-content").eq(index).html();
+            if(content == null) return content;
+            content = content.replace(/^\s+/g, '');
+            content = content.replace(/\s*$/,"");
+            $(".post-content").eq(index).html(content);
+        });
+    }
+</script>
 {% endblock %}

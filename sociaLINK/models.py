@@ -58,6 +58,7 @@ class MyUser(AbstractBaseUser):
     #Customize fields go here:
     slug = models.SlugField(max_length = 50, blank = True)
     following = models.ManyToManyField('self', symmetrical = False)
+    block = models.ManyToManyField('self', symmetrical = False, related_name = 'blocks')
 
 
     def __str__(self):
@@ -102,7 +103,8 @@ def auto_user_slug_and_profile(*args, **kwargs):
         instance.save()
 
         #Create a new profile
-        Profile.objects.create(user = instance, avatar = "/avatar/default.png")
+        Profile.objects.create(user = instance, avatar = "/avatar/default.png",
+            cover = "/cover/default-cover.jpg")
 
 models.signals.post_save.connect(auto_user_slug_and_profile, sender = MyUser)
 

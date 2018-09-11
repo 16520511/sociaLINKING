@@ -56,7 +56,7 @@ def user_logout(request):
 @login_required(login_url = '/')
 def home(request):
     #Show user's and people they are following's posts
-    homePosts = (Post.objects.filter(user = request.user)|Post.objects.filter(user__in = request.user.following.all(),
+    Posts = (Post.objects.filter(user = request.user)|Post.objects.filter(user__in = request.user.following.all(),
         privacySetting = 'Public')).order_by('-postedOn').filter(postedOn__gte = datetime.datetime.now()-datetime.timedelta(weeks = 2))
     #Get all the actions with the posts from current user
     userUpActions = UserAction.objects.filter(user = request.user, action = 'Up')
@@ -99,10 +99,10 @@ def home(request):
         if 'numberOfLoad' in request.POST:
             numberOfLoad = int(request.POST.get('numberOfLoad', None))
             #Check the number of posts left
-            if homePosts.count() >= numberOfLoad*10:
-                jsonData = serializers.serialize('json', homePosts[((numberOfLoad-1)*10):(numberOfLoad*10-1)])
-            elif homePosts.count() > (numberOfLoad-1)*10 and homePosts.count() < numberOfLoad*10:
-                jsonData = serializers.serialize('json', homePosts[(numberOfLoad-1)*10:])
+            if Posts.count() >= numberOfLoad*10:
+                jsonData = serializers.serialize('json', Posts[((numberOfLoad-1)*10):(numberOfLoad*10-1)])
+            elif Posts.count() > (numberOfLoad-1)*10 and Posts.count() < numberOfLoad*10:
+                jsonData = serializers.serialize('json', Posts[(numberOfLoad-1)*10:])
 
             #No more posts
             else:
@@ -141,14 +141,34 @@ def home(request):
     for action in userDownActions:
         downPosts.append(action.post)
     
-    return render(request, 'home.html', {'homePosts': homePosts[:10], 'upPosts': upPosts,
+    return render(request, 'home.html', {'Posts': Posts[:10], 'upPosts': upPosts,
                 'downPosts': downPosts})
 
 def user_page(request, slug):
     user = MyUser.objects.filter(slug = slug)
     if user.count() == 1:
         user = user[0]
-        return render(request, 'user_page.html', {'user': user})
+        userUpActions = UserAction.objects.filter(user = user, action = 'Up')
+        userDownActions = UserAction.objects.filter(user = user, action = 'Down')
+        if not request.user in user.block.all():
+            Posts = Post.objects.filter(user = user)
+
+            #Put all the informations needed here
+            followers = 0
+            for u in MyUser.objects.all():
+                if user in u.following.all():
+                    followers += 1
+            followings = user.following.all().count()
+            upPosts = []
+            downPosts = []
+            for action in userUpActions:
+                upPosts.append(action.post)
+            for action in userDownActions:
+                downPosts.append(action.post)
+            return render(request, 'user_page.html', {'Posts': Posts[:10], 'upPosts': upPosts,
+                'downPosts': downPosts, 'followers': followers, 'followings': followings})
+        else:
+            return render(request, 'error.html', {'errorMessage': 'You cannot see this page because this user have private setting or you have been blocked.'})
     elif user.count() == 0:
         return render(request, 'error.html', {'errorMessage': 'User Not Found'})
 

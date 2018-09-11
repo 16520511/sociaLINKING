@@ -4,9 +4,14 @@ body{
     font-family: Verdana, Tahoma, sans-serif;
     background-color: lavender;
     font-size: 15px;
+    word-break: break-all;
+}
+
+body::-webkit-scrollbar { 
+    display: none; 
 }
 .content {
-    padding: 30px;
+    padding: 25px;
 }
 input, textarea, select {
     padding: 5px;

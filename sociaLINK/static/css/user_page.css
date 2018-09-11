@@ -1,0 +1,53 @@
+.container {
+    grid-template-rows: auto auto;
+}
+
+.middle, .left, .right {
+    grid-row: 2;
+}
+
+.header-cover {
+    grid-column-start: 1;
+    grid-column-end: 4;
+    text-align: center;  
+}
+
+    .cover-image {
+        width: 90%;
+        max-height: 300px;
+    }
+
+.header-avatar {
+    text-align: center;
+    padding: 20px 0;
+}
+    .avatar-image {
+        max-height: 200px;
+        border-radius: 50%;
+    }
+
+    .header-avatar h2 {
+        margin: 0 auto;
+        color: red;
+    }
+
+    .header-avatar p {
+        margin: 3px;
+    }
+
+.statistic {
+    margin: 15px 0 0 10px;
+    font-size: 16px;
+}
+
+.right {
+    margin: 20px 20.1% 0 0;
+    background-color: white;
+    border: 1px solid #ccc;
+}
+
+.left {
+    margin: 20px 0 0 20.1%;
+    background-color: white;
+    border: 1px solid #ccc;
+}

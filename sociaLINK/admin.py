@@ -48,11 +48,11 @@ class UserAdmin(BaseUserAdmin):
     list_filter = ('email', 'is_admin',)
     fieldsets = (
         (None, {'fields': ('email', 'password')}),
-        ('Personal info', {'fields' : ('firstName', 'lastName', 'gender', 'age', 'slug', 'following',)}),
+        ('Personal info', {'fields' : ('firstName', 'lastName', 'gender', 'age', 'slug', 'following', 'block')}),
         ('Permissions', {'fields': ('is_admin',)}),
     )
 
-    readonly_fields = ('following',)
+    readonly_fields = ('following', 'block')
 
     add_fieldsets = (
         (None, {
