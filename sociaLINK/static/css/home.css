@@ -8,6 +8,7 @@
     #self-avatar {
         grid-column: 1;
         max-width: 100%;
+        min-height: 120px;
         max-height: 220px;
     }
 
@@ -19,8 +20,8 @@
 
     textarea {
         resize: none;
-        width: 90%;
-        height: 60%;
+        width: 100%;
+        min-height: 60%;
         margin-bottom: 10px;
     }
 
@@ -31,16 +32,6 @@
     .post-btn:hover {
         background-color: rgb(55, 112, 131);
     }
-
-    @keyframes loading {
-        0% { transform: rotateZ(0deg); }
-        100% { transform: rotateZ(360deg); }
-    }
-
-#no-more-posts {
-    color: red;
-    margin: 0 10px;
-}
 
 .left {
     grid-column: 1;

@@ -7,45 +7,78 @@
 
 <div class="container">
     <div class="header-cover">
-        <img class="cover-image" src="{{ user.profile.cover.url }}">
+        <img class="cover-image" src="{{ targetUser.profile.cover.url }}">
     </div>
     <div class="left">
         <div class="header-avatar">
-            <img class="avatar-image" src="{{ user.profile.avatar.url }}">
-            <h2>{{ user.get_full_name }}</h2>
-            <p>Gender: {{ user.gender }}</p>
-            <p>Age: {{ user.age }}</p>
+            <img class="avatar-image" src="{{ targetUser.profile.avatar.url }}">
+            <h2>{{ targetUser.get_full_name }}</h2>
+            <p>Gender: {{ targetUser.gender }}</p>
+            <p>Age: {{ targetUser.age }}</p>
+            <!--You cannot follow yourself-->
+            {% if request.user != targetUser %}
+            {% if not iHaveFollowed %}
+                <button class="btn follow-btn" title="Follow {{ targetUser.get_full_name }}">Follow</button>
+            {% else %}
+                <button class="btn follow-btn stop-following" title="Stop following {{ targetUser.get_full_name }}">Following</button>
+            {% endif %}
+            {% endif %}
         </div>
     </div>
     <div class="middle">
-        <ins class="statistic">Followers: {{ followers }}, Followings: {{ followings }}</ins>
-    <!--Post Section-->     
+        <p class="statistic">Followers: {{ followers }}, Followings: {{ followings }}</p>
+        <!--Post Section-->     
         {% include 'partial-post-section.html' %}
+        <!---->
     </div>
 
     <div class="right">
     </div>
 </div>
-
+<script src="{% static 'js/common-functions.js' %}"></script>
 <script>
     let numberOfLoad = 1;
     $(document).ready(() => {
-        strimContent();
-
-        //let avatarImage = $(".avatar-image");
-        //avatarImage.css("margin-top", `${($(".cover-image").height() - avatarImage.height())/2}px`);
+        TrimContent();
+        handleAction(0, 9, "{{ csrf_token }}");
+        adjustLoadingPos();
     });
 
-    //FUCNTION SECTION
-    //Strim all white spaces at the start and end of content
-    function strimContent() {
-        $(".post-content").each((index, value) => {
-            let content = $(".post-content").eq(index).html();
-            if(content == null) return content;
-            content = content.replace(/^\s+/g, '');
-            content = content.replace(/\s*$/,"");
-            $(".post-content").eq(index).html(content);
+    pageScrollAjax("{% url 'user_page' targetUser.slug %}", "{{ csrf_token }}");
+
+    //Code to change state when hover on unfollow button
+    $(".stop-following").mouseenter(() => {
+        $(".stop-following").html("Stop Following");
+    });
+
+    $(".stop-following").mouseleave(() => {
+        $(".stop-following").html("Following");
+    });
+    //
+
+    //Send follow request AJAX
+    $(".follow-btn").click(() => {
+        $.ajax({
+            type:"post",
+            data: {
+                "follow": "{{ targetUser.id }}",
+                csrfmiddlewaretoken: "{{ csrf_token }}",
+            }
+        }).done((data) => {
+            data = JSON.parse(data);
+            let followBtn = $(".follow-btn");
+            if (data["followed"] == "False") {
+                followBtn.removeClass("stop-following");
+                followBtn.html("Follow");
+                followBtn.attr("title", "Follow {{ targetUser.get_full_name }}");
+            }
+            else if (data["followed"] == "True") {
+                followBtn.addClass("stop-following");
+                followBtn.html("Following");
+                followBtn.attr("title", "Stop following {{ targetUser.get_full_name }}");
+            }
+            $(".statistic").html(`Followers: ${data['followers']}, Followings: ${data['followings']}`);
         });
-    }
+    })
 </script>
 {% endblock %}

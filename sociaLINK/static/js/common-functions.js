@@ -1,22 +1,32 @@
-$(window).scroll(function() {
+//Trim whitespace head and end of posts
+function TrimContent() {
+    $(".post-content").each((index, value) => {
+        let content = $(".post-content").eq(index).html();
+        if(content == null) return content;
+        content = content.trim();
+        $(".post-content").eq(index).html(content);
+    });
+}
+
+//Handle the page scroll to load more posts using AJAX
+function pageScrollAjax(url, token) {
+    $(window).scroll(function() {
     if($(window).scrollTop() + $(window).height() == $(document).height()) {
         // Only show load more icon when the no more post message isn't showing
         if ($("#no-more-posts").length == 0)
             $(".load-more").css("display", "initial");
-
         //Set 1s for page load, just to make it look cool
         setTimeout(() => {
             numberOfLoad++;
             $.ajax({
                 type: "post",
-                url: "{% url 'home' %}",
+                url: url,
                 data: {
                     numberOfLoad: numberOfLoad,
-                    csrfmiddlewaretoken: "{{ csrf_token }}",
+                    csrfmiddlewaretoken: token,
                 }
             }).done((data) => {
                 data = JSON.parse(data);
-                console.log(data);
                 //Receive JSON data and pass it to the view
                 if (data[0] != undefined) {
                 for(let i = 0; i < data.length; i++) {
@@ -25,6 +35,7 @@ $(window).scroll(function() {
                     let post = `<div class="post-detail">
                             <img class="post-avatar" src="${data[i].avatar}">
                             <p class="post-user-name"><a href = "${data[i].slug}">${data[i].username}</a></p>
+                            <div class="post-wrap">
                             <div class="post-content">
                                 ${content}
                             </div>
@@ -35,6 +46,7 @@ $(window).scroll(function() {
                                 <svg class="post-action repost" aria-hidden="true" data-prefix="fas" data-icon="sync-alt" class="svg-inline--fa fa-sync-alt fa-w-16" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="blue" d="M370.72 133.28C339.458 104.008 298.888 87.962 255.848 88c-77.458.068-144.328 53.178-162.791 126.85-1.344 5.363-6.122 9.15-11.651 9.15H24.103c-7.498 0-13.194-6.807-11.807-14.176C33.933 94.924 134.813 8 256 8c66.448 0 126.791 26.136 171.315 68.685L463.03 40.97C478.149 25.851 504 36.559 504 57.941V192c0 13.255-10.745 24-24 24H345.941c-21.382 0-32.09-25.851-16.971-40.971l41.75-41.749zM32 296h134.059c21.382 0 32.09 25.851 16.971 40.971l-41.75 41.75c31.262 29.273 71.835 45.319 114.876 45.28 77.418-.07 144.315-53.144 162.787-126.849 1.344-5.363 6.122-9.15 11.651-9.15h57.304c7.498 0 13.194 6.807 11.807 14.176C478.067 417.076 377.187 504 256 504c-66.448 0-126.791-26.136-171.315-68.685L48.97 471.03C33.851 486.149 8 475.441 8 454.059V320c0-13.255 10.745-24 24-24z"></path></svg><span class="action-number">${data[i].fields.repostNumber} </span>     
                                 <span class="post-date">${data[i].fields.postedOn}</span>
                             </div>
+                            </div>
                         </div>`;
                         $(".load-more").before(post);
                         if (data[i].up == 'False'){
@@ -44,17 +56,87 @@ $(window).scroll(function() {
                             $(`svg#down-${data[i].pk}`).children(":first").attr("fill", "#333");
                         }
                     }
-                    strimContent();
-                    handleAction((numberOfLoad-1)*10, (numberOfLoad-1)*10+data.length);
+                    TrimContent();
+                    handleAction((numberOfLoad-1)*10, (numberOfLoad-1)*10+data.length, token);
                 }
-
                 //If there is no more posts to load, show message
                 else {
                     if ($("#no-more-posts").length == 0)
-                        $(".load-more").before("<p id='no-more-posts'>You don't have any more posts to see.</p>");
+                        $(".load-more").before("<p id='no-more-posts'>There are no more posts to show.</p>");
                     $(".load-more").css("display", "none");
                 }
             });
         }, 1000);
     }
-});
+    });
+}
+
+//Handle the actions from user, the first 2 params used identify which posts it will have effect to,
+//to prevent the functions from not working after ajax call
+function handleAction(startNumber, stopNumber, token) {
+    //Up action
+    $(".up").each((index, value) => {
+        if (index >= startNumber && index <= stopNumber) {
+            let up = $(".up").eq(index);
+            let postId = up.parent().children(":first").attr('id');
+            up.on("click", () => {
+                $.ajax({
+                    type: "post",
+                    data: {
+                        up: postId,
+                        csrfmiddlewaretoken: token,
+                    }
+                }).done((data) => {
+                    data = JSON.parse(data);
+                    //Change the status of the up and down buttons
+                    if (data['userUp'] == 'True') {
+                        up.children(":first").attr("fill", "green");
+                    }
+                    else if (data['userUp'] == 'False') {
+                        up.children(":first").attr("fill", "#333");
+                    }
+                    up.next().html(`${data['up']}`);
+                    let down = up.next().next();
+                    down.children(":first").attr("fill", "#333");
+                    down.next().html(`${data['down']}`);
+                });
+            });
+        }
+    });
+
+    //Down Action
+    $(".down").each((index, value) => {
+        if (index >= startNumber && index <= stopNumber) {
+            let down = $(".down").eq(index);
+            let postId = down.parent().children(":first").attr('id');
+            down.on("click", () => {
+                $.ajax({
+                    type: "post",
+                    data: {
+                        down: postId,
+                        csrfmiddlewaretoken: token,
+                    }
+                }).done((data) => {
+                    data = JSON.parse(data);
+                    //Change the status of the up and down buttons
+                    if (data['userDown'] == 'True') {
+                        down.children(":first").attr("fill", "red");
+                    }
+                    else if (data['userDown'] == 'False') {
+                        down.children(":first").attr("fill", "#333");
+                    }
+                    down.next().html(`${data['down']}`);
+                    let up = down.prev().prev();
+                    up.children(":first").attr("fill", "#333");
+                    up.next().html(`${data['up']}`);
+                })
+            })
+        }
+    });
+}
+
+//Centered the load more icon
+function adjustLoadingPos() {
+    let loadMore = $(".load-more")
+    loadMore.css("margin-left", `${($(".middle").width()-loadMore.width())/2}`);
+}

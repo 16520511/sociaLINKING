@@ -9,9 +9,9 @@
 </head> 
     <body>
         <ul class="navbar">
-            <li style="float:left;"><a href="{% url 'home' %}">Home</a></li>
-            <li><a href="{% url 'user_logout' %}">Logout</a></li>
-            <li><a href="{% url 'user_page' request.user.slug %}">Hello, {{ request.user.get_full_name }}</a></li>
+            <li class="title"><a href="{% url 'home' %}">Socia<span>LINK</span></a></li>
+            <li class="nav-item"><a href="{% url 'user_logout' %}">Logout</a></li>
+            <li class="nav-item"><a href="{% url 'user_page' request.user.slug %}">Hello, {{ request.user.get_full_name }}</a></li>
         </ul>
         <div class="content">
             {% block content %}

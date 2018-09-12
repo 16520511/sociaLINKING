@@ -9,7 +9,7 @@
 .header-cover {
     grid-column-start: 1;
     grid-column-end: 4;
-    text-align: center;  
+    text-align: center;
 }
 
     .cover-image {
@@ -20,6 +20,9 @@
 .header-avatar {
     text-align: center;
     padding: 20px 0;
+    background-color: white;
+    border: 1px solid #ccc;
+    box-shadow: 3px 3px 5px #ccc;
 }
     .avatar-image {
         max-height: 200px;
@@ -35,19 +38,27 @@
         margin: 3px;
     }
 
+    .follow-btn {
+        background-color: orangered;
+    }
+
+        .follow-btn:hover {
+            background-color: rgb(211, 56, 0);
+        }
+
+    .stop-following {
+        background-color: #448BA3;
+    }
+
+        .stop-following:hover{ 
+            background-color: rgb(211, 0, 0);
+        }
+
 .statistic {
-    margin: 15px 0 0 10px;
-    font-size: 16px;
-}
-
-.right {
-    margin: 20px 20.1% 0 0;
-    background-color: white;
-    border: 1px solid #ccc;
-}
-
-.left {
-    margin: 20px 0 0 20.1%;
-    background-color: white;
-    border: 1px solid #ccc;
+    text-align: center;
+    font-weight: bold;
+    margin: 15px 10px 0 10px;
+    padding: 5px;
+    border-bottom: 3px solid #ccc; 
+    max-height: 20px;
 }
