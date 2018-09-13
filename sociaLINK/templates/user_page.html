@@ -41,6 +41,7 @@
     $(document).ready(() => {
         TrimContent();
         handleAction(0, 9, "{{ csrf_token }}");
+        handlePostSetting(0, 9, "{{ csrf_token }}");
         adjustLoadingPos();
     });
 

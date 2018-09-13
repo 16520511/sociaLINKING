@@ -34,7 +34,7 @@ input, textarea, select {
     list-style-type: none;
     padding: 0px;
     overflow: hidden;
-    background-color: rgb(83, 100, 177);
+    background-color: rgb(73, 142, 165);
 }
     .navbar li {
         color: white;
@@ -48,14 +48,41 @@ input, textarea, select {
             text-decoration: none;
             cursor: pointer;
         }
-            .nav-item:hover {
-                background-color: #fe5a1d;
-            }
+
+        .nav-item:hover {
+            background-color: #fe5a1d;
+        }
+
+        .search-bar {
+            position: absolute;
+        }
+
+        .search-bar-container { 
+            background-color: lavender;
+            border-radius: 5px;
+            padding: 1px;
+        }
+
+        #search-icon {
+            position: absolute;
+            left: 5px;
+            width: 20px;
+        }
+
+        #search-bar input {
+            background-color: lavender;
+            border: none !important;
+            border-radius: 0 !important;
+            outline: none;
+            padding-left: 30px;
+            margin: 0;
+        }
+        
         .title {
             position: absolute;
-            top: -2px;
+            top: -3px;
             left: 0;
-            font-size: 18px;
+            font-size: 20px;
         }
 
 #self-avatar {
@@ -66,5 +93,9 @@ input, textarea, select {
     .btn {
         font-size: 15px;
         padding: 5px;
+    }
+
+    .search-bar {
+        display: none;
     }
 }

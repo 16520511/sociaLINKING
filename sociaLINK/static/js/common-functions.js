@@ -9,7 +9,7 @@ function TrimContent() {
 }
 
 //Handle the page scroll to load more posts using AJAX
-function pageScrollAjax(url, token) {
+function pageScrollAjax(url, token, requestUserId) {
     $(window).scroll(function() {
     if($(window).scrollTop() + $(window).height() == $(document).height()) {
         // Only show load more icon when the no more post message isn't showing
@@ -48,6 +48,18 @@ function pageScrollAjax(url, token) {
                             </div>
                             </div>
                         </div>`;
+                        console.log(requestUserId);
+                        console.log(requestUserId == String(data[i].fields.user));
+                        if (requestUserId == String(data[i].fields.user)) {
+                            post = post.replace(`<div class="post-wrap">`, `<div class="post-wrap"><div id="post-setting-${data[i].pk}" class="post-setting">
+                            <svg class="post-setting-icon" aria-hidden="true" data-prefix="fas" data-icon="ellipsis-h" class="svg-inline--fa fa-ellipsis-h fa-w-16" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+                                <path fill="rgb(145, 144, 144)" d="M328 256c0 39.8-32.2 72-72 72s-72-32.2-72-72 32.2-72 72-72 72 32.2 72 72zm104-72c-39.8 0-72 32.2-72 72s32.2 72 72 72 72-32.2 72-72-32.2-72-72-72zm-352 0c-39.8 0-72 32.2-72 72s32.2 72 72 72 72-32.2 72-72-32.2-72-72-72z"></path></svg>
+                                <div class="post-setting-panel" id="post-setting-panel-${data[i].pk}" hidden>
+                                <p class="post-setting-options delete-post">Delete the post</p>
+                                <p class="post-setting-options modify-post">Modify the post</p>
+                                </div>
+                            </div>`)
+                        }
                         $(".load-more").before(post);
                         if (data[i].up == 'False'){
                             $(`svg#up-${data[i].pk}`).children(":first").attr("fill", "#333");
@@ -58,6 +70,7 @@ function pageScrollAjax(url, token) {
                     }
                     TrimContent();
                     handleAction((numberOfLoad-1)*10, (numberOfLoad-1)*10+data.length, token);
+                    handlePostSetting((numberOfLoad-1)*10, (numberOfLoad-1)*10+data.length, token);
                 }
                 //If there is no more posts to load, show message
                 else {
@@ -134,9 +147,54 @@ function handleAction(startNumber, stopNumber, token) {
         }
     });
 }
+function handlePostSetting(startNumber, stopNumber, token) { 
+    $(".post-setting-icon").each((index) => {
+        if (index >= startNumber && index <= stopNumber) {
+            let postSettingIcon = $(".post-setting-icon").eq(index);
+            let postSetting = postSettingIcon.parent();
+            //Get post id
+            let postId = postSetting.attr("id");
+            postId = postId.split("-")[2];
 
+            //Show panel when clicked the post setting icon
+            postSettingIcon.click(() => {
+                let postSettingPanel = $(`#post-setting-panel-${postId}`);
+                if (postSettingPanel.is(":hidden")) {
+                    $(".post-setting-panel").attr("hidden", "true");
+                    postSettingPanel.removeAttr("hidden");
+                }
+                else {   
+                    postSettingPanel.attr("hidden", "true");
+                }
+            });
+        }
+    });
+
+    $(".delete-post").each((index) => {
+        if (index >= startNumber && index <= stopNumber) {
+            let deletePost = $(".delete-post").eq(index);
+            let postId = deletePost.parent().parent().attr("id");
+            postId = postId.split("-")[2];
+            deletePost.on("click", () => {
+                $.ajax({
+                    type: "post",
+                    data: {
+                        "deletePost": postId,
+                        csrfmiddlewaretoken: token,
+                    }
+                }).done((data) => {
+                    data = JSON.parse(data);
+                    if (data['message'] == 'Success') {
+                        deletePost.parent().parent().parent().parent().remove();
+                    }
+                });
+            });
+        }
+    });   
+}
 //Centered the load more icon
 function adjustLoadingPos() {
     let loadMore = $(".load-more")
     loadMore.css("margin-left", `${($(".middle").width()-loadMore.width())/2}`);
 }
+

@@ -9,10 +9,8 @@
             <svg class="post-setting-icon" aria-hidden="true" data-prefix="fas" data-icon="ellipsis-h" class="svg-inline--fa fa-ellipsis-h fa-w-16" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
                 <path fill="rgb(145, 144, 144)" d="M328 256c0 39.8-32.2 72-72 72s-72-32.2-72-72 32.2-72 72-72 72 32.2 72 72zm104-72c-39.8 0-72 32.2-72 72s32.2 72 72 72 72-32.2 72-72-32.2-72-72-72zm-352 0c-39.8 0-72 32.2-72 72s32.2 72 72 72 72-32.2 72-72-32.2-72-72-72z"></path></svg>
                 <div class="post-setting-panel" id="post-setting-panel-{{ post.id }}" hidden>
-                    {% if post.user == request.user %}
-                    <p class="post-setting-options">Delete the post</p>
-                    <p class="post-setting-options">Modify the post</p>
-                    {% endif %}
+                <p class="post-setting-options delete-post">Delete the post</p>
+                <p class="post-setting-options modify-post">Modify the post</p>
                 </div>
             </div>
                 {% endif %}
@@ -55,32 +53,9 @@ $(document).ready(() => {
     let mouseOutsideOfPanels = true;
 
     //Handle post setting event
-    $(".post-setting-icon").each((index) => {
-        let postSettingIcon = $(".post-setting-icon").eq(index);
-        let postSetting = postSettingIcon.parent();
-        //Get post id
-        let postId = postSetting.attr("id");
-        postId = postId.split("-")[2];
-
-        postSettingIcon.click(() => {
-            if ($(`#post-setting-panel-${postId}:hidden`).is(":hidden")) {
-                $(".post-setting-panel").attr("hidden", "true");
-                $(`#post-setting-panel-${postId}`).removeAttr("hidden");
-            }            
-            else {   
-                $(`#post-setting-panel-${postId}`).attr("hidden", "false");
-            }
-        });
-    });
 
     //Check if mouse outside of the post setting icons and panels
     $(".post-setting-icon").hover(() => 
-    {
-        mouseOutsideOfPanels = false;
-    }, () => {
-        mouseOutsideOfPanels = true;
-    });
-    $(".post-setting-panel").hover(() => 
     {
         mouseOutsideOfPanels = false;
     }, () => {

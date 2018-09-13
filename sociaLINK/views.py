@@ -8,6 +8,7 @@ from .models import MyUser, Post, UserAction
 import datetime
 import json
 from django.core import serializers
+from .seach_engine import SearchEngine
 
 #Login Page - also default Page
 def default_login(request):
@@ -133,6 +134,18 @@ def home(request):
                             i['down'] = 'True'
                             break
             return HttpResponse(json.dumps(jsonData))
+
+        if 'deletePost' in request.POST:
+            postId = request.POST.get('deletePost', None)
+            post = Post.objects.filter(pk = postId)[0]
+            if request.user == post.user:
+                post.delete()
+                message = 'Success'
+            else:
+                message = 'Fail'
+            jsonData = {"message": message,}
+            return HttpResponse(json.dumps(jsonData))
+
         
     upPosts = []
     downPosts = []
@@ -238,6 +251,17 @@ def user_page(request, slug):
                     jsonData = {"followed":followed, "followers": followers, "followings": followings}
                     return HttpResponse(json.dumps(jsonData))
 
+                if 'deletePost' in request.POST:
+                    postId = request.POST.get('deletePost', None)
+                    post = Post.objects.filter(pk = postId)[0]
+                    if request.user == post.user:
+                        post.delete()
+                        message = 'Success'
+                    else:
+                        message = 'Fail'
+                    jsonData = {"message": message,}
+                    return HttpResponse(json.dumps(jsonData))
+
             #Put all the informations needed here
             followers = 0
             for u in MyUser.objects.all():
@@ -261,3 +285,27 @@ def user_page(request, slug):
             return render(request, 'error.html', {'errorMessage': 'You cannot see this page because this user have private setting or you have been blocked.'})
     elif targetUser.count() == 0:
         return render(request, 'error.html', {'errorMessage': 'User Not Found.'})
+
+def search(request):
+    search = SearchEngine()
+    query = location = ""
+    openTab = "by-name"
+    if request.method == 'GET':
+        if 'location' not in request.GET:
+            query = request.GET.get("q", "")
+            if query == "":
+                search.result = MyUser.objects.none()
+            else:
+                search.search_by_name(query)
+        if 'location' in request.GET:
+            query = request.GET.get("q", "")
+            location = request.GET.get("location", "")
+            if query == "" and location == "":
+                search.result = MyUser.objects.none()
+            else:
+                search.search_by_name(query)
+                search.search_by_location(location)
+            openTab = "by-location"
+
+    return render(request, "search.html", {'result': search.result, 'query': query, 'location': location,
+        'openTab': openTab})

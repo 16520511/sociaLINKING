@@ -33,9 +33,10 @@
     $(document).ready(() => {
         handleAction(0, 9, "{{ csrf_token }}");
         TrimContent();  
-        adjustLoadingPos();  
+        adjustLoadingPos();
+        handlePostSetting(0, 9, "{{ csrf_token }}");
     });
 
-    pageScrollAjax("{% url 'home' %}", "{{ csrf_token }}");
+    pageScrollAjax("{% url 'home' %}", "{{ csrf_token }}", "{{ request.user.id }}");
 </script>
 {% endblock %}

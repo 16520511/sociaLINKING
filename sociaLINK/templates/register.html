@@ -1,7 +1,6 @@
 {% extends 'login_layout.html' %}
 
 {% block content %}
-
 <div class="right-content">
     <h2>Register A New SociaLINK Account</h2>
     <form method="post">
@@ -12,7 +11,7 @@
         <table>
             {% for field in regForm %}  
                 <tr><td>{{ field.label }}</td>
-                <td style="padding-bottom:5px">{{ field }}</td></tr>
+                <td style="padding-bottom:5px; padding-left: 10px;">{{ field }}</td></tr>
                 <div class="form-error">
                         {{ field.errors|striptags }}
                 </div>
