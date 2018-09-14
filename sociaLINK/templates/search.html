@@ -1,25 +1,31 @@
 {% extends 'layout.html' %}
 {% block content %}
+{% load static %}
 <style>
-    body {font-family: Arial;}
+    .content {
+        padding: 5px 12%;
+        font-family: Arial;
+    }
     
     /* Style the tab */
     .tab {
         overflow: hidden;
         border: 1px solid #ccc;
         background-color: #f1f1f1;
+        padding: 0;
     }
 
     /* Style the buttons inside the tab */
     .tab button {
         background-color: inherit;
-        float: left;
         border: none;
         outline: none;
         cursor: pointer;
-        padding: 14px 16px;
+        float: left;
+        padding: 10px 5px;
         transition: 0.3s;
         font-size: 16px;
+        width: 33.33%;
     }
     
     /* Change background color of buttons on hover */
@@ -39,51 +45,162 @@
         border: 1px solid #ccc;
         border-top: none;
     }
+
+    .location-search-box {
+        border: none;
+        outline: none;
+        border-radius: 0;
+        background: inherit;
+        border-bottom: 1.5px dashed rgb(138, 137, 137);
+        margin-right: 10px;
+    }
+
+
+    .search-btn {
+        border-radius: 0px;
+        background-color:orangered;
+    }
+
+    .search-result {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        grid-gap: 15px;
+    }
+
+    .result-detail {
+        display: grid;
+        grid-template-columns: 30% 60%;
+        grid-gap: 5%;
+        background-color: white;
+        border: 1px solid #ccc;
+        padding: 10px;
+    }
+
+    .user-avatar {
+        grid-column: 1;
+        width: 100%;
+    }
+
+    .user-detail {
+        grid-column: 2;
+    }
+    .user-detail p {
+        margin: 7px 0;
+    }
+
+    .follow-btn {
+        padding: 5px;
+    }
+
+    .stop-following {
+        position: relative;
+        background-color: #448BA3;
+        padding-right: 30px;
+        padding-left: 10px !important;
+        text-align: left !important;
+    }
+
+    .stop-following svg {
+        position: absolute;
+        width: 17px;
+        top: 5px;
+        right: 10px;
+    }
+    @media only screen and (max-device-width: 500px) {
+        .content {
+            padding: 0 10px;
+        }
+        .result-detail {
+            background-color: inherit;
+            border: none;
+        }
+    }
 </style>
-        
-<h2>Find On SociaLINK</h2>
+<div class="content">
+{% if query != "" %}
+<h2>Search Results For {{ query }}</h2>
+{% else %}
+<h2>Search{{ query }}</h2>
+{% endif %}
         
 <div class="tab">
-    <button class="tablinks by-name" onclick="openTab(event, 'by-name')">Find By Name</button>
-    <button class="tablinks by-location" onclick="openTab(event, 'by-location')">Find By Location</button>
+    <button class="tablinks by-name" onclick="openTab(event, 'by-name')">By Name</button>
+    <button class="tablinks by-location" onclick="openTab(event, 'by-location')">By Location</button>
     <button class="tablinks" onclick="openTab(event, 'by')">Ongoing</button>
 </div>
 
 <div id="by-name" class="tabcontent">
     <h3>People</h3>
-    {% for user in result %}
-        {{ user.get_full_name }}
-    {% endfor %}
+    <div class="search-result">
+        {% for user in result %}
+        <div class="result-detail">
+            <img class="user-avatar" src="{{ user.profile.avatar.url }}">
+            <div class="user-detail">
+                <a href="{% url 'user_page' user.slug %}">{{ user.get_full_name }}</a>
+                <p>{{ user.gender }} 
+                <p>Location: {{ user.profile.location }}</p>
+                {% if request.user != user %}
+                {% if user not in request.user.following.all %}
+                <button class="btn follow-btn" id="follow-user-{{ user.id }}">Follow</button>
+                {% else %}
+                <button class="btn follow-btn stop-following" id="follow-user-{{ user.id }}" title="Stop following {{ targetUser.get_full_name }}">Following
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="white" d="M173.898 439.404l-166.4-166.4c-9.997-9.997-9.997-26.206 0-36.204l36.203-36.204c9.997-9.998 26.207-9.998 36.204 0L192 312.69 432.095 72.596c9.997-9.997 26.207-9.997 36.204 0l36.203 36.204c9.997 9.997 9.997 26.206 0 36.204l-294.4 294.401c-9.998 9.997-26.207 9.997-36.204-.001z"/></svg>
+                </button>
+                {% endif %}
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
 </div>
 
 <div id="by-location" class="tabcontent">
-    <h3>Location</h3>
+    {% if location != "" %}
+    <h3>Location: {{ location }}</h3>
+    {% endif %}
     <form method="get">
         <input type="hidden" name = "q" value="{{ query }}">
-        <input type="text" name="location" placeholder="location" value="{{ location }}">
-        <input type="submit">
+        <input class="location-search-box" type="text" name="location" placeholder="Enter a location" value="{{ location }}">
+        <input class="btn search-btn" type="submit" value="Search">
     </form>
     <br>
-    {% for user in result %}
-        {{ user.get_full_name }}
-    {% endfor %}
+    <div class="search-result">
+        {% for user in result %}
+        <div class="result-detail">
+            <img class="user-avatar" src="{{ user.profile.avatar.url }}">
+            <div class="user-detail">
+                <a href="{% url 'user_page' user.slug %}">{{ user.get_full_name }}</a>
+                <p>{{ user.gender }} 
+                <p>Location: {{ user.profile.location }}</p>
+                {% if request.user != user %}
+                {% if user not in request.user.following.all %}
+                <button class="btn follow-btn" id="follow-user-{{ user.id }}">Follow</button>
+                {% else %}
+                <button class="btn follow-btn stop-following" id="follow-user-{{ user.id }}" title="Stop following {{ targetUser.get_full_name }}">Following
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="white" d="M173.898 439.404l-166.4-166.4c-9.997-9.997-9.997-26.206 0-36.204l36.203-36.204c9.997-9.998 26.207-9.998 36.204 0L192 312.69 432.095 72.596c9.997-9.997 26.207-9.997 36.204 0l36.203 36.204c9.997 9.997 9.997 26.206 0 36.204l-294.4 294.401c-9.998 9.997-26.207 9.997-36.204-.001z"/></svg>
+                </button>
+                {% endif %}
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
 </div>
 
 <div id="by" class="tabcontent">
     <h3>Ongoing Process</h3>
 </div>
-        
+</div>
 
-
-
-
+<script src="{% static 'js/follow-action.js' %}"></script>
 <script>
     $(document).ready(() => {
         //if ("{{ openTab }}" == "by-name")
         $(`.{{ openTab }}`).addClass("active");
         $(`#{{ openTab }}`).css("display", "block");
+        $(".tab button").height($(".tab").height());
+        followAction("{{ csrf_token }}", 5, 30);
     });
-
     function openTab(evt, tabName) {
         var i, tabcontent, tablinks;
         tabcontent = document.getElementsByClassName("tabcontent");

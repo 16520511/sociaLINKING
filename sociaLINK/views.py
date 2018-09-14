@@ -238,7 +238,7 @@ def user_page(request, slug):
                     followed = 'False'
                     if targetUser in request.user.following.all():
                         request.user.following.remove(targetUser)
-                    elif targetUser not in request.user.following.all() and request.user not in targetUser.block.all() and request.user != targetUser:
+                    elif not targetUser in request.user.following.all() and not request.user in targetUser.block.all() and request.user != targetUser:
                         request.user.following.add(targetUser)
                         followed = 'True'
 
@@ -280,7 +280,7 @@ def user_page(request, slug):
             for action in userDownActions:
                 downPosts.append(action.post)
             return render(request, 'user_page.html', {'targetUser': targetUser, 'Posts': Posts[:10], 'upPosts': upPosts,
-                'downPosts': downPosts, 'followers': followers, 'followings': followings, 'iHaveFollowed': iHaveFollowed})
+                'downPosts': downPosts, 'followers': followers, 'followings': followings})
         else:
             return render(request, 'error.html', {'errorMessage': 'You cannot see this page because this user have private setting or you have been blocked.'})
     elif targetUser.count() == 0:
@@ -306,6 +306,18 @@ def search(request):
                 search.search_by_name(query)
                 search.search_by_location(location)
             openTab = "by-location"
+    if request.method == 'POST':
+        if 'follow' in request.POST:
+            userId = request.POST.get("follow", None)
+            targetUser = MyUser.objects.get(pk = userId)
+            followed = 'False'
+            if targetUser in request.user.following.all():
+                request.user.following.remove(targetUser)
+            elif targetUser not in request.user.following.all() and request.user not in targetUser.block.all() and request.user != targetUser:
+                request.user.following.add(targetUser)
+                followed = 'True'
+            jsonData = {"followed":followed}
+            return HttpResponse(json.dumps(jsonData))
 
     return render(request, "search.html", {'result': search.result, 'query': query, 'location': location,
         'openTab': openTab})

@@ -37,23 +37,7 @@
     .header-avatar p {
         margin: 3px;
     }
-
-    .follow-btn {
-        background-color: orangered;
-    }
-
-        .follow-btn:hover {
-            background-color: rgb(211, 56, 0);
-        }
-
-    .stop-following {
-        background-color: #448BA3;
-    }
-
-        .stop-following:hover{ 
-            background-color: rgb(211, 0, 0);
-        }
-
+    
 .statistic {
     text-align: center;
     font-weight: bold;

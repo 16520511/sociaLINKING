@@ -21,6 +21,10 @@ input, textarea, select {
     border-radius: 4px;
 }
 
+input[type=submit] {
+    cursor: pointer;
+}
+
 .btn {
     border: none;
     padding: 10px;
@@ -40,17 +44,18 @@ input, textarea, select {
         color: white;
         float: right;
     }
-        li a {
+        .navbar li a {
             display: block;
             color: white;
             text-align: center;
             padding: 14px 16px;
             text-decoration: none;
             cursor: pointer;
+            transition: 0.3s;
         }
 
-        .nav-item:hover {
-            background-color: #fe5a1d;
+        .navbar .nav-item :hover {
+            box-shadow: 0 -5px 0px -2px white inset;
         }
 
         .search-bar {
@@ -70,7 +75,7 @@ input, textarea, select {
         }
 
         #search-bar input {
-            background-color: lavender;
+            background-color: inherit;
             border: none !important;
             border-radius: 0 !important;
             outline: none;
@@ -88,6 +93,33 @@ input, textarea, select {
 #self-avatar {
     border-radius: 50%;
 }
+
+.follow-btn {
+    background-color: orangered;
+}
+
+    .follow-btn:hover {
+        background-color: rgb(211, 56, 0);
+    }
+
+.stop-following {
+    position: relative;
+    background-color: #448BA3;
+    padding-right: 30px;
+    padding-left: 10px !important;
+    text-align: left !important;
+}
+
+    .stop-following:hover{ 
+        background-color: rgb(211, 0, 0);
+    }
+
+    .stop-following svg {
+        position: absolute;
+        width: 17px;
+        top: 10px;
+        right: 10px;
+    }
 
 @media only screen and (max-device-width: 500px) {
     .btn {

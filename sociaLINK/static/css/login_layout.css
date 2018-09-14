@@ -10,18 +10,6 @@ input, select {
     border: 1px solid #ccc;
     border-radius: 4px; 
 }
-
-input[type=text], input[type=email], input[type=password] {
-    padding: 5px;
-    font-size: 16px;
-    border: none !important;
-    border-bottom: 1px solid rgb(131, 131, 131) !important;
-    background-color: lavender;
-    border-radius: 0; 
-}
-input[type=text]:focus, input[type=email]:focus, input[type=password]:focus {
-    outline: none;
-}
 .content {
     display: grid;
     grid-template-columns: 50% 50%;
@@ -78,7 +66,6 @@ input[type=text]:focus, input[type=email]:focus, input[type=password]:focus {
         color: blue;
         padding: 10px;
     }
-
     form .btn {
         border: none;
         padding: 10px;

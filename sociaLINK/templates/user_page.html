@@ -17,10 +17,12 @@
             <p>Age: {{ targetUser.age }}</p>
             <!--You cannot follow yourself-->
             {% if request.user != targetUser %}
-            {% if not iHaveFollowed %}
-                <button class="btn follow-btn" title="Follow {{ targetUser.get_full_name }}">Follow</button>
+            {% if not targetUser in request.user.following.all %}
+                <button class="btn follow-btn" id="follow-user-{{ targetUser.id }}" title="Follow {{ targetUser.get_full_name }}">Follow</button>
             {% else %}
-                <button class="btn follow-btn stop-following" title="Stop following {{ targetUser.get_full_name }}">Following</button>
+                <button class="btn follow-btn stop-following" id="follow-user-{{ targetUser.id }}" title="Stop following {{ targetUser.get_full_name }}">Following
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="white" d="M173.898 439.404l-166.4-166.4c-9.997-9.997-9.997-26.206 0-36.204l36.203-36.204c9.997-9.998 26.207-9.998 36.204 0L192 312.69 432.095 72.596c9.997-9.997 26.207-9.997 36.204 0l36.203 36.204c9.997 9.997 9.997 26.206 0 36.204l-294.4 294.401c-9.998 9.997-26.207 9.997-36.204-.001z"/></svg>
+                </button>
             {% endif %}
             {% endif %}
         </div>
@@ -36,6 +38,7 @@
     </div>
 </div>
 <script src="{% static 'js/common-functions.js' %}"></script>
+<script src="{% static 'js/follow-action.js' %}"></script>
 <script>
     let numberOfLoad = 1;
     $(document).ready(() => {
@@ -43,43 +46,9 @@
         handleAction(0, 9, "{{ csrf_token }}");
         handlePostSetting(0, 9, "{{ csrf_token }}");
         adjustLoadingPos();
+        followAction("{{ csrf_token }}", 10, 30);
     });
 
     pageScrollAjax("{% url 'user_page' targetUser.slug %}", "{{ csrf_token }}");
-
-    //Code to change state when hover on unfollow button
-    $(".stop-following").mouseenter(() => {
-        $(".stop-following").html("Stop Following");
-    });
-
-    $(".stop-following").mouseleave(() => {
-        $(".stop-following").html("Following");
-    });
-    //
-
-    //Send follow request AJAX
-    $(".follow-btn").click(() => {
-        $.ajax({
-            type:"post",
-            data: {
-                "follow": "{{ targetUser.id }}",
-                csrfmiddlewaretoken: "{{ csrf_token }}",
-            }
-        }).done((data) => {
-            data = JSON.parse(data);
-            let followBtn = $(".follow-btn");
-            if (data["followed"] == "False") {
-                followBtn.removeClass("stop-following");
-                followBtn.html("Follow");
-                followBtn.attr("title", "Follow {{ targetUser.get_full_name }}");
-            }
-            else if (data["followed"] == "True") {
-                followBtn.addClass("stop-following");
-                followBtn.html("Following");
-                followBtn.attr("title", "Stop following {{ targetUser.get_full_name }}");
-            }
-            $(".statistic").html(`Followers: ${data['followers']}, Followings: ${data['followings']}`);
-        });
-    })
 </script>
 {% endblock %}
