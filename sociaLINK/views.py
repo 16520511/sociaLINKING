@@ -4,7 +4,7 @@ from django.urls import reverse
 from .forms import LoginForm, RegisterForm
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login, logout
-from .models import MyUser, Post, UserAction
+from .models import MyUser, Post, UserAction, Notification
 import datetime
 import json
 from django.core import serializers
@@ -62,6 +62,7 @@ def home(request):
     #Get all the actions with the posts from current user
     userUpActions = UserAction.objects.filter(user = request.user, action = 'Up')
     userDownActions = UserAction.objects.filter(user = request.user, action = 'Down')
+    noti = Notification.objects.filter(user = request.user)
     if request.method == 'POST':
         #If new post request
         if 'content' in request.POST:
@@ -137,7 +138,7 @@ def home(request):
 
         if 'deletePost' in request.POST:
             postId = request.POST.get('deletePost', None)
-            post = Post.objects.filter(pk = postId)[0]
+            post = Post.objects.get(pk = postId)
             if request.user == post.user:
                 post.delete()
                 message = 'Success'
@@ -155,7 +156,7 @@ def home(request):
         downPosts.append(action.post)
     
     return render(request, 'home.html', {'Posts': Posts[:10], 'upPosts': upPosts,
-                'downPosts': downPosts})
+                'downPosts': downPosts, 'noti': noti})
 
 def user_page(request, slug):
     targetUser = MyUser.objects.filter(slug = slug)

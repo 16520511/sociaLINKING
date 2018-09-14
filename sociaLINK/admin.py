@@ -3,7 +3,7 @@ from django import forms
 from django.contrib.auth.forms import ReadOnlyPasswordHashField
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.contrib.auth.models import Group
-from .models import MyUser, MyUserManager, Profile, Post, UserAction
+from .models import MyUser, MyUserManager, Profile, Post, UserAction, Notification
 
 class UserCreationForm(forms.ModelForm):
     class Meta:
@@ -70,5 +70,6 @@ admin.site.register(MyUser, UserAdmin)
 admin.site.register(Profile)
 admin.site.register(Post)
 admin.site.register(UserAction)
+admin.site.register(Notification)
 
 admin.site.unregister(Group)

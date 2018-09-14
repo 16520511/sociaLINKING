@@ -12,7 +12,7 @@ body::-webkit-scrollbar {
     display: none; 
 }
 .content {
-    padding: 25px;
+    padding: 15px;
 }
 input, textarea, select {
     padding: 5px;

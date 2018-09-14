@@ -1,6 +1,6 @@
 .container {
     display: grid;
-    grid-auto-columns: 24% 50% 24%;
+    grid-auto-columns: 26% 45.5% 26%;
     grid-gap: 1%;
 }
 
@@ -118,8 +118,6 @@
 .right {
     grid-column: 3;
     margin: 20px 20.1% 0 0;
-    background-color: white;
-    border: 1px solid #ccc;
 }
 
 .left {

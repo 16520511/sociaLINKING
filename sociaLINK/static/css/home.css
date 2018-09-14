@@ -35,12 +35,38 @@
 
 .left {
     grid-column: 1;
-    background-color: green;
 }
 .right {
     grid-column: 3;
-    background-color: red;
 }
+
+    .noti-section {
+        background-color: white;
+        border: 1px solid #ccc;
+        margin-top: 10px;
+        padding: 10px;
+    }
+
+    .noti {
+        margin: 10px auto;
+        padding: 5px;
+    }
+
+    .read {
+        background-color: rgb(223, 222, 222);
+    }
+
+    .not-read {
+        background-color: rgb(207, 235, 250)
+    }
+    .noti a {
+        text-decoration: none;
+        color: rgb(29, 28, 28);
+    }
+
+    .noti p {
+        margin: 0;
+    }
 
 @media only screen and (max-device-width: 500px) {
     .new-post-editor {

@@ -108,6 +108,18 @@ def auto_user_slug_and_profile(*args, **kwargs):
 
 models.signals.post_save.connect(auto_user_slug_and_profile, sender = MyUser)
 
+#Send a notification for a user when someone follow them
+def follow_notification(*args, **kwargs):
+    instance = kwargs['instance']
+    action = kwargs['action']
+    if kwargs['pk_set']:
+        if action == 'post_add':
+            notificationUser = MyUser.objects.filter(pk__in = kwargs['pk_set'])[0]
+            message = f'{ instance.get_full_name } followed you.'
+            Notification.objects.create(user = notificationUser, message = message, url = instance.slug)
+
+models.signals.m2m_changed.connect(follow_notification, sender = MyUser.following.through)
+
 class Profile(models.Model):
     user = models.OneToOneField(MyUser, on_delete = models.CASCADE)
     location = models.CharField(max_length = 100, blank = True, null = True)
@@ -151,11 +163,16 @@ class UserAction(models.Model):
     action = models.CharField(max_length = 6, choices = ACTION)
     createdOn = models.DateTimeField(auto_now_add = True)
 
-#Create a connection between Post and UserAction when a new post is created
+#Create a connection between Post and UserAction when a new post is created, and send a
+#notification to tagged users if any
 def post_created(*args, **kwargs):
     instance = kwargs['instance']
     if kwargs['created']:
         UserAction.objects.create(user = instance.user, post = instance, action = 'Post')
+        for user in MyUser.objects.all():
+            message = f'{instance.user.get_full_name} mentioned you in a post.'
+            if instance.content.find(f'@{user.slug}') != -1:
+                Notification.objects.create(user = user, message = message)
 
 models.signals.post_save.connect(post_created, sender = Post)
 
@@ -195,3 +212,11 @@ def action_delete(*args, **kwargs):
 models.signals.post_save.connect(action_created, sender = UserAction)
 models.signals.post_delete.connect(action_delete, sender = UserAction)
 
+class Notification(models.Model):
+    user = models.ForeignKey(MyUser, on_delete = models.CASCADE)
+    message = models.CharField(max_length = 100)
+    url = models.CharField(max_length = 100, blank = True, null = True)
+    isRead = models.BooleanField(default = False)
+
+    def __str__(self):
+        return f'Notification for {self.user.slug}'

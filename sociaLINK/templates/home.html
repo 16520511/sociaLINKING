@@ -24,6 +24,29 @@
     </div>
 
     <div class="right">
+        <div class="noti-section">
+            <h3>Notification</h3>
+            {% for n in noti %}
+            {% if n.isRead %}
+                <div class="noti read">
+                    {% if n.url != None %}
+                    <a href = "/{{ n.url }}">{{ n.message }}</a>
+                    {% else %}
+                    <p>{{ n.message }}</p>
+                    {% endif %}
+                </div>
+            {% else %}
+                <div class="noti not-read">
+                    {% if n.url != None %}
+                    <a href = "/{{ n.url }}">{{ n.message }}</a>
+                    {% else %}
+                    <p>{{ n.message }}</p>
+                    {% endif %}        
+                </div>
+            {% endif %}
+            {% endfor %}
+            </div>
+        </div>
     </div>
 </div>
 
