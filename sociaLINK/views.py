@@ -9,6 +9,7 @@ import datetime
 import json
 from django.core import serializers
 from .seach_engine import SearchEngine
+import pdb
 
 #Login Page - also default Page
 def default_login(request):
@@ -138,9 +139,9 @@ def home(request):
 
         if 'deletePost' in request.POST:
             postId = request.POST.get('deletePost', None)
-            post = Post.objects.get(pk = postId)
-            if request.user == post.user:
-                post.delete()
+            p = Post.objects.get(pk = postId)
+            if request.user == p.user:
+                p.delete()
                 message = 'Success'
             else:
                 message = 'Fail'
@@ -254,7 +255,7 @@ def user_page(request, slug):
 
                 if 'deletePost' in request.POST:
                     postId = request.POST.get('deletePost', None)
-                    post = Post.objects.filter(pk = postId)[0]
+                    post = Post.objects.get(pk = postId)
                     if request.user == post.user:
                         post.delete()
                         message = 'Success'

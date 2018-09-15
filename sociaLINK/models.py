@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 from django.core.exceptions import ValidationError
+import pdb
 
 class MyUserManager(BaseUserManager):
     def create_user(self, email, password, firstName, lastName, age, gender = 'Male'):
@@ -163,18 +164,22 @@ class UserAction(models.Model):
     action = models.CharField(max_length = 6, choices = ACTION)
     createdOn = models.DateTimeField(auto_now_add = True)
 
-#Create a connection between Post and UserAction when a new post is created, and send a
-#notification to tagged users if any
+#Create a connection between Post and UserAction when a new post is created
 def post_created(*args, **kwargs):
     instance = kwargs['instance']
     if kwargs['created']:
         UserAction.objects.create(user = instance.user, post = instance, action = 'Post')
-        for user in MyUser.objects.all():
-            message = f'{instance.user.get_full_name} mentioned you in a post.'
-            if instance.content.find(f'@{user.slug}') != -1:
-                Notification.objects.create(user = user, message = message)
+
+#send a notification to tagged users if any
+def post_tagged(*args, **kwargs):
+    instance = kwargs['instance']
+    message = f'{instance.user.get_full_name} mentioned you in a post.'
+    for user in MyUser.objects.all():    
+        if instance.content.find(f'@{user.slug}') != -1:
+            noti = Notification.objects.create(user = user, message = message)
 
 models.signals.post_save.connect(post_created, sender = Post)
+models.signals.post_save.connect(post_tagged, sender = Post)
 
 #Update the action number in the post model when a user action is created...
 def action_created(*args, **kwargs):
@@ -187,6 +192,8 @@ def action_created(*args, **kwargs):
             if down.count() > 0:
                 down.delete()
                 instance.post.downNumber -= 1
+                instance.post.save()
+
         if instance.action == 'Down':
             instance.post.downNumber += 1
             #Delete the up vote from user with this post
@@ -194,26 +201,32 @@ def action_created(*args, **kwargs):
             if up.count() > 0:
                 up.delete()
                 instance.post.upNumber -= 1
+                instance.post.save()
+
         if instance.action == 'Repost':
             instance.post.repostNumber += 1
-        instance.post.save()
-
+            instance.post.save()
+        
 #...And when it is deleted
 def action_delete(*args, **kwargs):
     instance = kwargs['instance']
     if instance.action == 'Up':
         instance.post.upNumber -= 1
+        instance.post.save()
     if instance.action == 'Down':
         instance.post.downNumber -= 1
+        instance.post.save()
     if instance.action == 'Repost':
         instance.post.repostNumber -= 1
-    instance.post.save()
+        instance.post.save()
+    
 
 models.signals.post_save.connect(action_created, sender = UserAction)
 models.signals.post_delete.connect(action_delete, sender = UserAction)
 
 class Notification(models.Model):
     user = models.ForeignKey(MyUser, on_delete = models.CASCADE)
+    post = models.ForeignKey(Post, on_delete = models.CASCADE, blank = True, null = True)
     message = models.CharField(max_length = 100)
     url = models.CharField(max_length = 100, blank = True, null = True)
     isRead = models.BooleanField(default = False)
