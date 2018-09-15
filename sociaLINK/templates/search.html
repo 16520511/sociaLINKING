@@ -132,7 +132,7 @@
 <div id="by-name" class="tabcontent">
     <h3>People</h3>
     <div class="search-result">
-        {% for user in result %}
+        {% for user in nameResult %}
         <div class="result-detail">
             <img class="user-avatar" src="{{ user.profile.avatar.url }}">
             <div class="user-detail">
@@ -165,7 +165,7 @@
     </form>
     <br>
     <div class="search-result">
-        {% for user in result %}
+        {% for user in locationResult %}
         <div class="result-detail">
             <img class="user-avatar" src="{{ user.profile.avatar.url }}">
             <div class="user-detail">

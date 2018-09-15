@@ -15,29 +15,33 @@
 .post-section {
     grid-row: 2;
 }
-
-    .post-detail {
-        margin: 10px;
-    }
+.post-detail
+{
+    position: relative;
+    padding: 0 3px 3px 3px;
+    background-color: white;
+    border: 1px solid #ccc;
+    margin: 25px 5px;
+}
     .post-avatar {
+        position: absolute;
+        top: -14px;
         height: 50px;
         border-radius: 50%;
     }
 
     .post-user-name  {
-        display: inline;
-        padding: 0 10px;
-        font-size: 17px;
-        background-color: rgb(43, 233, 144);  
+        margin: 5px 0 5px 55px;
+        font-size: 15px;
     }
-
         .post-user-name a {
             text-decoration: none;
+            color: orangered;
+            font-weight: 600;
         }
 
     .post-wrap {
-        border: 1px solid #ccc;
-        background-color: white;
+        border-top: 1px solid #ccc;
     }
 
     .post-setting {
@@ -72,7 +76,7 @@
             }
 
     .post-content {
-        margin-top: 10px;
+        margin-top: 15px;
         padding: 5px 10px;
         white-space: pre-wrap;
     }
@@ -136,6 +140,11 @@
 
     .post-avatar {
         height: 40px;
+        top: -5px;
+    }
+
+    .post-user-name {
+        margin-left: 45px;
     }
     .post-date {
         float: none;

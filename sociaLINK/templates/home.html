@@ -26,26 +26,37 @@
     <div class="right">
         <div class="noti-section">
             <h3>Notification</h3>
+            <hr>
             {% for n in noti %}
             {% if n.isRead %}
-                <div class="noti read">
-                    {% if n.url != None %}
-                    <a href = "/{{ n.url }}">{{ n.message }}</a>
-                    {% else %}
-                    <p>{{ n.message }}</p>
-                    {% endif %}
+            {% if n.url != None %}<a href = "/{{ n.url }}">{% endif %}
+                <div class="single-noti read">
+                <div class="noti-avatar-grid">
+                    <img class="noti-avatar" src="{{ n.otherEndUser.profile.avatar.url }}">
                 </div>
+                <div class="noti-message-grid"> 
+                    <div class="noti-message">
+                        <p>{{ n.message }}</p>
+                        <p class="noti-date">{{ n.createdAt }}</p>
+                    </div>     
+                </div>
+                </div>{% if n.url != None %}</a>{% endif %}
             {% else %}
-                <div class="noti not-read">
-                    {% if n.url != None %}
-                    <a href = "/{{ n.url }}">{{ n.message }}</a>
-                    {% else %}
-                    <p>{{ n.message }}</p>
-                    {% endif %}        
+            {% if n.url != None %}<a href = "/{{ n.url }}">{% endif %}
+                <div class="single-noti not-read">
+                <div class="noti-avatar-grid">
+                    <img class="noti-avatar" src="{{ n.otherEndUser.profile.avatar.url }}">
                 </div>
+                <div class="noti-message-grid">
+                    <div class="noti-message">
+                        <p>{{ n.message }}</p>
+                        <p class="noti-date">{{ n.createdAt }}</p>
+                    </div>     
+                </div>
+                </div>{% if n.url != None %}</a>{% endif %}
             {% endif %}
             {% endfor %}
-            </div>
+            <a id="see-more" href="#">See more</a>
         </div>
     </div>
 </div>
@@ -58,6 +69,16 @@
         TrimContent();  
         adjustLoadingPos();
         handlePostSetting(0, 9, "{{ csrf_token }}");
+
+        //Adjust the notification pos
+        $(".noti-message").each((index) => {
+            let notiMessage = $(".noti-message").eq(index);
+            notiMessage.css("margin-top", `${(notiMessage.parent().height()-notiMessage.height())/2}px`);
+        });
+        $(".noti-avatar").each((index) => {
+            let notiAvatar = $(".noti-avatar").eq(index);
+            notiAvatar.css("margin-top", `${(notiAvatar.parent().height()-notiAvatar.height())/2}px`);
+        });
     });
 
     pageScrollAjax("{% url 'home' %}", "{{ csrf_token }}", "{{ request.user.id }}");

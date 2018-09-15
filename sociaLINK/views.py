@@ -9,7 +9,6 @@ import datetime
 import json
 from django.core import serializers
 from .seach_engine import SearchEngine
-import pdb
 
 #Login Page - also default Page
 def default_login(request):
@@ -63,7 +62,8 @@ def home(request):
     #Get all the actions with the posts from current user
     userUpActions = UserAction.objects.filter(user = request.user, action = 'Up')
     userDownActions = UserAction.objects.filter(user = request.user, action = 'Down')
-    noti = Notification.objects.filter(user = request.user)
+    #User's notifications
+    noti = Notification.objects.filter(user = request.user).order_by('-createdAt')
     if request.method == 'POST':
         #If new post request
         if 'content' in request.POST:
@@ -155,7 +155,9 @@ def home(request):
         upPosts.append(action.post)
     for action in userDownActions:
         downPosts.append(action.post)
-    
+    #Only show 7 notifications    
+    if noti.count() >= 7:
+        noti = noti[:7]
     return render(request, 'home.html', {'Posts': Posts[:10], 'upPosts': upPosts,
                 'downPosts': downPosts, 'noti': noti})
 
@@ -289,24 +291,26 @@ def user_page(request, slug):
         return render(request, 'error.html', {'errorMessage': 'User Not Found.'})
 
 def search(request):
-    search = SearchEngine()
+    nameSearch = SearchEngine()
+    locationSearch = SearchEngine()
     query = location = ""
     openTab = "by-name"
     if request.method == 'GET':
         if 'location' not in request.GET:
             query = request.GET.get("q", "")
             if query == "":
-                search.result = MyUser.objects.none()
+                nameSearch.result = MyUser.objects.none()
             else:
-                search.search_by_name(query)
+                nameSearch.search_by_name(query)
+            locationSearch = nameSearch
         if 'location' in request.GET:
             query = request.GET.get("q", "")
             location = request.GET.get("location", "")
             if query == "" and location == "":
-                search.result = MyUser.objects.none()
+                locationSearch.result = MyUser.objects.none()
             else:
-                search.search_by_name(query)
-                search.search_by_location(location)
+                locationSearch.search_by_name(query)
+                locationSearch.search_by_location(location)
             openTab = "by-location"
     if request.method == 'POST':
         if 'follow' in request.POST:
@@ -321,5 +325,5 @@ def search(request):
             jsonData = {"followed":followed}
             return HttpResponse(json.dumps(jsonData))
 
-    return render(request, "search.html", {'result': search.result, 'query': query, 'location': location,
-        'openTab': openTab})
+    return render(request, "search.html", {'nameResult': nameSearch.result, 'locationResult': locationSearch.result,
+     'query': query, 'location': location, 'openTab': openTab})

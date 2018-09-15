@@ -1,7 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 from django.core.exceptions import ValidationError
-import pdb
+from datetime import datetime
 
 class MyUserManager(BaseUserManager):
     def create_user(self, email, password, firstName, lastName, age, gender = 'Male'):
@@ -117,7 +117,8 @@ def follow_notification(*args, **kwargs):
         if action == 'post_add':
             notificationUser = MyUser.objects.filter(pk__in = kwargs['pk_set'])[0]
             message = f'{ instance.get_full_name } followed you.'
-            Notification.objects.create(user = notificationUser, message = message, url = instance.slug)
+            Notification.objects.create(user = notificationUser, message = message, url = instance.slug,
+                otherEndUser = instance)
 
 models.signals.m2m_changed.connect(follow_notification, sender = MyUser.following.through)
 
@@ -176,7 +177,8 @@ def post_tagged(*args, **kwargs):
     message = f'{instance.user.get_full_name} mentioned you in a post.'
     for user in MyUser.objects.all():    
         if instance.content.find(f'@{user.slug}') != -1:
-            noti = Notification.objects.create(user = user, message = message)
+            noti = Notification.objects.create(user = user, message = message, post = instance,
+                otherEndUser = instance.user)
 
 models.signals.post_save.connect(post_created, sender = Post)
 models.signals.post_save.connect(post_tagged, sender = Post)
@@ -192,18 +194,18 @@ def action_created(*args, **kwargs):
             if down.count() > 0:
                 down.delete()
                 instance.post.downNumber -= 1
-                instance.post.save()
+            instance.post.save()
 
-        if instance.action == 'Down':
+        elif instance.action == 'Down':
             instance.post.downNumber += 1
             #Delete the up vote from user with this post
             up = UserAction.objects.filter(user = instance.user, post = instance.post, action = 'Up')
             if up.count() > 0:
                 up.delete()
                 instance.post.upNumber -= 1
-                instance.post.save()
+            instance.post.save()
 
-        if instance.action == 'Repost':
+        elif instance.action == 'Repost':
             instance.post.repostNumber += 1
             instance.post.save()
         
@@ -213,13 +215,12 @@ def action_delete(*args, **kwargs):
     if instance.action == 'Up':
         instance.post.upNumber -= 1
         instance.post.save()
-    if instance.action == 'Down':
+    elif instance.action == 'Down':
         instance.post.downNumber -= 1
         instance.post.save()
-    if instance.action == 'Repost':
+    elif instance.action == 'Repost':
         instance.post.repostNumber -= 1
         instance.post.save()
-    
 
 models.signals.post_save.connect(action_created, sender = UserAction)
 models.signals.post_delete.connect(action_delete, sender = UserAction)
@@ -227,9 +228,12 @@ models.signals.post_delete.connect(action_delete, sender = UserAction)
 class Notification(models.Model):
     user = models.ForeignKey(MyUser, on_delete = models.CASCADE)
     post = models.ForeignKey(Post, on_delete = models.CASCADE, blank = True, null = True)
+    otherEndUser = models.ForeignKey(MyUser, on_delete = models.CASCADE, blank = True, null = True,
+        related_name = "otherEnd")
     message = models.CharField(max_length = 100)
     url = models.CharField(max_length = 100, blank = True, null = True)
     isRead = models.BooleanField(default = False)
+    createdAt = models.DateTimeField(auto_now_add = True)
 
     def __str__(self):
         return f'Notification for {self.user.slug}'
