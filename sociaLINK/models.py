@@ -61,6 +61,7 @@ class MyUser(AbstractBaseUser):
     newNotificationsNumber = models.IntegerField(default = 0)
     following = models.ManyToManyField('self', symmetrical = False)
     block = models.ManyToManyField('self', symmetrical = False, related_name = 'blocks')
+    blockNoti = models.ManyToManyField('self', symmetrical = False, related_name = 'blockNotis')
 
 
     def __str__(self):
@@ -117,9 +118,10 @@ def follow_notification(*args, **kwargs):
     if kwargs['pk_set']:
         if action == 'post_add':
             notificationUser = MyUser.objects.filter(pk__in = kwargs['pk_set'])[0]
-            message = f'followed you.'
-            Notification.objects.create(user = notificationUser, message = message, url = instance.slug,
-                otherEndUser = instance)
+            if instance not in notificationUser.blockNotis.all():
+                message = f'followed you.'
+                Notification.objects.create(user = notificationUser, message = message, url = instance.slug,
+                    otherEndUser = instance)
 
 models.signals.m2m_changed.connect(follow_notification, sender = MyUser.following.through)
 
@@ -178,7 +180,7 @@ def post_tagged(*args, **kwargs):
     instance = kwargs['instance']
     message = f'mentioned you in a post.'
     for user in MyUser.objects.all():    
-        if instance.content.find(f'@{user.slug} ') != -1:
+        if instance.content.find(f'@{user.slug} ') != -1 and instance.user not in user.blockNotis.all():
             noti = Notification.objects.create(user = user, message = message, post = instance,
                 otherEndUser = instance.user)
 

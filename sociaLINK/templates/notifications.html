@@ -124,13 +124,13 @@
             </p>
             {% for n in noti %}
             {% if n.isRead %}
-            <div onclick="notiClick('{{ n.url }}')" class="single-noti read">
+            <div onclick="markRead('{{ n.url }}', '{{ n.id }}')" id="noti-{{ n.id }}" class="single-noti read">
                 <img class="noti-avatar" src="{{ n.otherEndUser.profile.avatar.url }}">
                 <div class="noti-message">
                     <div class="noti-setting">
                         <img class="noti-setting-icon" src="{% static 'images/noti-setting-icon.svg' %}">
                         <div class="noti-setting-options">
-                            <p>Stop receiving from {{ n.otherEndUser.get_full_name }}</p>
+                            <p onclick="stopNoti('{{ n.otherEndUser.id }}')">Stop receiving from {{ n.otherEndUser.get_full_name }}</p>
                         </div>
                     </div>
                     <p class="message"><span>{{ n.otherEndUser.get_full_name }}</span> {{ n.message }}</p>
@@ -148,14 +148,14 @@
                 </div>
             </div>
             {% else %}
-            <div onclick="notiClick('{{ n.url }}')" class="single-noti not-read">
+            <div onclick="markRead('{{ n.url }}', '{{ n.id }}')" id="noti-{{ n.id }}" class="single-noti not-read">
                 <img class="noti-avatar" src="{{ n.otherEndUser.profile.avatar.url }}">
                 <div class="noti-message">
                     <div class="noti-setting">
                         <img class="noti-setting-icon" src="{% static 'images/noti-setting-icon.svg' %}">
                         <div class="noti-setting-options">
-                            <p class="mark-read">Mark Read</p>
-                            <p class="stop-noti">Stop receiving from {{ n.otherEndUser.get_full_name }}</p>
+                            <p class="mark-read" onclick="markRead('None', '{{ n.id }}')">Mark Read</p>
+                            <p class="stop-noti" onclick="stopNoti('{{ n.otherEndUser.id }}')">Stop receiving from {{ n.otherEndUser.get_full_name }}</p>
                         </div>
                     </div>
                     <p class="message"><span>{{ n.otherEndUser.get_full_name }}</span> {{ n.message }}</p>
@@ -183,21 +183,30 @@
 </div>
 
 <script>
+    let goToNotiUrl = true;
+    let clickOutsideOptions = true;
+
     $(document).ready(() => {
-        let goToNotiUrl = true;
-        let clickOutsideOptions = true;
         //Mark all as read
        $("#mark-all-read").click(() => {
             $(".single-noti").removeClass("not-read");
             $(".single-noti").addClass("read");
+            $.ajax({
+                type: "post",
+                data: {
+                    markAllRead: 1,
+                    csrfmiddlewaretoken: "{{ csrf_token }}",
+                }
+            });
        });
-    });
-    //Close the noti options panel when clicking out.
-    $(document).mouseup(() => {
-        if (clickOutsideOptions)
-        {
-            $(".noti-setting-options").css("display", "none");
-        }
+
+        //Close the noti options panel when clicking out.
+        $(document).mouseup(() => {
+            if (clickOutsideOptions)
+            {
+                $(".noti-setting-options").css("display", "none");
+            }
+        });
     });
 
     //Code for each single notifications
@@ -233,10 +242,30 @@
         clickOutsideOptions = true;
         goToNotiUrl = true;
     });
-    //Go to the url of the notification
-    function notiClick(url) {
-        if (url != "None" && goToNotiUrl) 
+    //Go to the url of the notification and mark as read
+    function markRead(url, notiId) {
+        $.ajax({
+            type: "post",
+            data: {
+                markRead: notiId,
+                csrfmiddlewaretoken: "{{ csrf_token }}",
+            }
+        });
+        $(`#noti-${notiId}`).removeClass("not-read");
+        $(`#noti-${notiId}`).addClass("read");
+        if (url != "None" && goToNotiUrl)
             window.location.href = document.location.origin + "/" + url;
+    }
+
+    //Stop the notification coming from a specific user
+    function stopNoti(otherEndUserId) {
+        $.ajax({
+            type: "post",
+            data: {
+                stopNoti: otherEndUserId,
+                csrfmiddlewaretoken: "{{ csrf_token }}",
+            }
+        });
     }
 
 </script>

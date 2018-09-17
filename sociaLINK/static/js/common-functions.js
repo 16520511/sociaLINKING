@@ -1,3 +1,8 @@
+//These variable are used to determine the target that the code 
+//for post setting icon and post delete icon will handle
+let previousSettingIndex = -1;
+let previousDeletePostIndex = -1;
+
 //Trim whitespace head and end of posts
 function TrimContent() {
     $(".post-content").each((index, value) => {
@@ -48,8 +53,6 @@ function pageScrollAjax(url, token, requestUserId) {
                             </div>
                             </div>
                         </div>`;
-                        console.log(requestUserId);
-                        console.log(requestUserId == String(data[i].fields.user));
                         if (requestUserId == String(data[i].fields.user)) {
                             post = post.replace(`<div class="post-wrap">`, `<div class="post-wrap"><div id="post-setting-${data[i].pk}" class="post-setting">
                             <svg class="post-setting-icon" aria-hidden="true" data-prefix="fas" data-icon="ellipsis-h" class="svg-inline--fa fa-ellipsis-h fa-w-16" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
@@ -148,8 +151,10 @@ function handleAction(startNumber, stopNumber, token) {
     });
 }
 function handlePostSetting(startNumber, stopNumber, token) { 
-    $(".post-setting-icon").each((index) => {
-        if (index >= startNumber && index <= stopNumber) {
+    $(".post-setting-icon").each((index) => { 
+        console.log(previousSettingIndex);
+        if (index > previousSettingIndex) {
+            previousSettingIndex = index;
             let postSettingIcon = $(".post-setting-icon").eq(index);
             let postSetting = postSettingIcon.parent();
             //Get post id
@@ -167,11 +172,12 @@ function handlePostSetting(startNumber, stopNumber, token) {
                     postSettingPanel.attr("hidden", "true");
                 }
             });
-        }
+        }     
     });
 
     $(".delete-post").each((index) => {
-        if (index >= startNumber && index <= stopNumber) {
+        if (index > previousDeletePostIndex) {
+            previousDeletePostIndex = index;
             let deletePost = $(".delete-post").eq(index);
             let postId = deletePost.parent().parent().attr("id");
             postId = postId.split("-")[2];

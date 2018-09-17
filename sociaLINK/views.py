@@ -334,4 +334,24 @@ def notifications(request):
     noti = Notification.objects.filter(user = request.user).order_by('-createdAt')
     request.user.newNotificationsNumber = 0 #Set the new notifications number to 0 if the user access the notifications page.
     request.user.save()
+
+    if request.method == 'POST':
+        #Handle mark as read a noti
+        if 'markRead' in request.POST:
+            notiId = request.POST.get('markRead', None)
+            readNoti = Notification.objects.get(pk = notiId)
+            readNoti.isRead = True
+            readNoti.save()
+        #Handle mark all as read
+        if 'markAllRead' in request.POST:
+            allUserNoti = Notification.objects.filter(user = request.user)
+            for noti in allUserNoti:
+                noti.isRead = True
+                noti.save()
+        #Stop receing notification
+        if 'stopNoti' in request.POST:
+            otherEndUserId = request.POST.get('stopNoti', None)
+            otherEndUser = MyUser.objects.get(pk = otherEndUserId)
+            request.user.blockNoti.add(otherEndUser)
+            request.user.save()
     return render(request, 'notifications.html', {'noti': noti})
