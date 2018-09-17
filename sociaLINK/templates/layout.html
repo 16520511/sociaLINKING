@@ -11,6 +11,12 @@
     <body>
         <ul class="navbar">
             <li class="title"><a href="{% url 'home' %}">Socia<span>LINK</span></a></li>
+            <a href = "{% url 'notifications' %}"><li class="noti-button">
+                <img src="{% static 'images/notifications-button.svg' %}">
+                {% if request.user.newNotificationsNumber > 0 %}
+                <p id = "new-noti-number">{{ request.user.newNotificationsNumber }}</p>
+                {% endif %}
+            </li></a>
             <li class="search-bar">
                 <form id="search-bar" method = "get" action = "{% url 'search' %}">
                     <div class="search-bar-container">
@@ -36,6 +42,7 @@
         let searchBarContainer = $(".search-bar-container"); 
         let searchBarInput = $("#search-bar input");
         let searchIcon = $("#search-icon");
+        let notiButton = $(".noti-button")
         let rightItemLength = 0;
         for (let i = 0; i < $(".nav-item").length; i++)
         {
@@ -46,6 +53,7 @@
         searchBar.css({"right": `${rightItemLength+10}px`, "top": `${(navBar.height() - searchBar.height())/2}px`});
         searchBarInput.css({"width": `${navBar.width()*0.20}px`});
         searchIcon.css({"top": `${(searchBarContainer.height() - searchIcon.height())/2+1}px`});
+        notiButton.css({"left": `${searchBar.position().left-65}px`, "top": `${(navBar.height() - notiButton.height())/2+1}px`});
     });
 </script>
 </html>

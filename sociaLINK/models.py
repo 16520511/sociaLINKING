@@ -58,6 +58,7 @@ class MyUser(AbstractBaseUser):
 
     #Customize fields go here:
     slug = models.SlugField(max_length = 50, blank = True)
+    newNotificationsNumber = models.IntegerField(default = 0)
     following = models.ManyToManyField('self', symmetrical = False)
     block = models.ManyToManyField('self', symmetrical = False, related_name = 'blocks')
 
@@ -97,7 +98,7 @@ def auto_user_slug_and_profile(*args, **kwargs):
             takenSlug.append(i.slug)
 
         counter = 1
-        while slug in takenSlug:
+        while slug in takenSlug or slug == 'notifications':
             slug = f'{originalSlug}-{str(counter)}'
             counter += 1
         instance.slug = slug
@@ -116,7 +117,7 @@ def follow_notification(*args, **kwargs):
     if kwargs['pk_set']:
         if action == 'post_add':
             notificationUser = MyUser.objects.filter(pk__in = kwargs['pk_set'])[0]
-            message = f'{ instance.get_full_name } followed you.'
+            message = f'followed you.'
             Notification.objects.create(user = notificationUser, message = message, url = instance.slug,
                 otherEndUser = instance)
 
@@ -127,6 +128,7 @@ class Profile(models.Model):
     location = models.CharField(max_length = 100, blank = True, null = True)
     job = models.CharField(max_length = 100, blank = True, null = True)
     education = models.CharField(max_length = 100, blank = True, null = True)
+    bio = models.TextField(max_length = 400, blank = True, null = True)
 
     avatar = models.ImageField(upload_to='avatar', max_length = 100, blank = True, null = True)
     cover = models.ImageField(upload_to='cover', max_length = 100, blank = True, null = True)
@@ -174,9 +176,9 @@ def post_created(*args, **kwargs):
 #send a notification to tagged users if any
 def post_tagged(*args, **kwargs):
     instance = kwargs['instance']
-    message = f'{instance.user.get_full_name} mentioned you in a post.'
+    message = f'mentioned you in a post.'
     for user in MyUser.objects.all():    
-        if instance.content.find(f'@{user.slug}') != -1:
+        if instance.content.find(f'@{user.slug} ') != -1:
             noti = Notification.objects.create(user = user, message = message, post = instance,
                 otherEndUser = instance.user)
 
@@ -237,3 +239,11 @@ class Notification(models.Model):
 
     def __str__(self):
         return f'Notification for {self.user.slug}'
+
+def notification_created(*args, **kwargs):
+    instance = kwargs['instance']
+    if kwargs['created']:
+        instance.user.newNotificationsNumber += 1
+        instance.user.save()
+
+models.signals.post_save.connect(notification_created, sender = Notification)

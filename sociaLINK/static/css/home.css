@@ -40,11 +40,11 @@
     grid-column: 3;
 }
 
-    .noti-section {
+    .right-section {
         background-color: white;
+        padding: 10px;
         border: 1px solid #ccc;
         margin-top: 10px;
-        padding: 10px;
         text-align: center;
     }
 
@@ -56,19 +56,19 @@
         padding: 5px;
     }
 
-    .read {
-        background-color: rgb(247, 244, 244);
+    .single-noti.read {
+        background-color: inherit;
     }
 
-        .read:hover {
+        .single-noti.read:hover {
             background-color: rgb(230, 227, 227);
         }
 
-    .not-read {
+    .single-noti.not-read {
         background-color: rgb(207, 235, 250);
     }
 
-        .not-read:hover {
+        .single-noti.not-read:hover {
             background-color: rgb(186, 215, 231);
         }
 
@@ -97,6 +97,10 @@
 
     .noti-message p {
         margin: 0;
+    }
+
+    .noti-message span {
+        font-weight: 600;
     }
 
 @media only screen and (max-device-width: 500px) {

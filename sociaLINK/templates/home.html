@@ -14,7 +14,7 @@
             <img id="self-avatar" src="{{ request.user.profile.avatar.url }}">
             <form class="editor" method="post">
                 {% csrf_token %}
-                <textarea name="content" required placeholder="Write something here..."></textarea>
+                <textarea name="content" required placeholder="Write something here..." maxlength="500" minlength="5"></textarea>
                 <br>
                 <input class="btn post-btn" type="submit" value="Post Now">
             </form>
@@ -24,9 +24,9 @@
     </div>
 
     <div class="right">
+        <div class="right-section">
         <div class="noti-section">
-            <h3>Notification</h3>
-            <hr>
+            <h3>Notifications</h3>   
             {% for n in noti %}
             {% if n.isRead %}
             {% if n.url != None %}<a href = "/{{ n.url }}">{% endif %}
@@ -34,11 +34,11 @@
                 <div class="noti-avatar-grid">
                     <img class="noti-avatar" src="{{ n.otherEndUser.profile.avatar.url }}">
                 </div>
-                <div class="noti-message-grid"> 
+                <div class="noti-message-grid">
                     <div class="noti-message">
-                        <p>{{ n.message }}</p>
+                        <p><span>{{ n.otherEndUser.get_full_name }}</span> {{ n.message }}</p>
                         <p class="noti-date">{{ n.createdAt }}</p>
-                    </div>     
+                    </div>
                 </div>
                 </div>{% if n.url != None %}</a>{% endif %}
             {% else %}
@@ -49,14 +49,20 @@
                 </div>
                 <div class="noti-message-grid">
                     <div class="noti-message">
-                        <p>{{ n.message }}</p>
+                        <p><span>{{ n.otherEndUser.get_full_name }}</span> {{ n.message }}</p>
                         <p class="noti-date">{{ n.createdAt }}</p>
                     </div>     
                 </div>
                 </div>{% if n.url != None %}</a>{% endif %}
             {% endif %}
             {% endfor %}
-            <a id="see-more" href="#">See more</a>
+            <br>
+            <a id="see-more" href="{% url 'notifications' %}">See more</a>
+        </div>
+        <hr>
+        <div class="followings-section">
+            <h3>People you followed</h3>
+        </div>
         </div>
     </div>
 </div>

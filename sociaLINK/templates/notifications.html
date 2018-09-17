@@ -1,0 +1,243 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+{% load static %}
+<style>
+    .left, .right {
+        background-color: white;
+    }
+    .notifications-area {
+        background-color: white;
+        border: 1px solid rgb(224, 223, 223);
+        position: relative;
+    }
+
+    .notifications-area h3 {
+        margin: 10px;
+    }
+    #mark-all-read {
+        position: absolute;
+        top: 12px;
+        right: 5px;
+        margin: 0;
+        font-size: 14px;
+        color: red;
+        cursor: pointer;
+    }
+    .single-noti {
+        display: grid;
+        position: relative;
+        grid-template-columns: 10% 85%;
+        grid-gap: 5%;
+        padding: 10px;
+        border-bottom: 1px solid #ccc;
+        cursor: pointer;
+    }
+    .single-noti.read {
+        background-color: inherit;
+    }
+        .single-noti.read:hover {
+            background-color: rgb(230, 227, 227);
+        }
+    .single-noti.not-read {
+        background-color: rgb(207, 235, 250);
+    }
+        .single-noti.not-read:hover {
+            background-color: rgb(186, 215, 231);
+        }
+    .single-noti .noti-avatar {
+        width: 100%;
+        border-radius: 50%;
+    }
+    .single-noti .noti-message{
+        grid-column: 2;
+    }
+        .message {
+            padding: 0;
+            margin: 0;
+        }
+
+        .message span {
+            font-weight: 600;
+        }
+        .single-noti .noti-message .post-content {
+            background-color: white;
+            border: 1px solid #ccc;
+            padding: 5px;
+            border-radius: 4px;
+        }
+        .single-noti .noti-message .post-content .content {
+            padding: 0;
+            margin: 0;
+        }
+    .noti-setting {
+        display: block;
+        float: right;
+        margin-top: -5px;
+    }
+        .noti-setting-icon {
+            display: none;
+            width: 15px;
+        }
+
+            .noti-setting-icon:hover {
+                filter: brightness(0.1);
+            }
+
+        .noti-setting-options {
+            display: none;
+            position: absolute;
+            top: 20px;
+            right: -200px;
+            padding: 0px;
+            background-color: white;
+            border: 1px solid #ccc;
+            z-index: 2;
+            max-width: 220px;
+        }
+            .noti-setting-options p {
+                padding: 3px;
+                margin: 0 auto;
+                font-weight: 600;
+                font-size: 15px;
+            }
+            .noti-setting-options p:hover {
+                background-color: #ccc;
+            }
+
+@media only screen and (max-device-width: 500px) {
+    .noti-setting-options {
+        right: 0;
+    }
+}
+</style>
+<div class="container">
+    <div class="left">
+        
+    </div>
+
+    <div class="middle">
+        <div class="notifications-area">
+            <h3>Notifications</h3>
+            <p id="mark-all-read">
+                Mark all as Read
+            </p>
+            {% for n in noti %}
+            {% if n.isRead %}
+            <div onclick="notiClick('{{ n.url }}')" class="single-noti read">
+                <img class="noti-avatar" src="{{ n.otherEndUser.profile.avatar.url }}">
+                <div class="noti-message">
+                    <div class="noti-setting">
+                        <img class="noti-setting-icon" src="{% static 'images/noti-setting-icon.svg' %}">
+                        <div class="noti-setting-options">
+                            <p>Stop receiving from {{ n.otherEndUser.get_full_name }}</p>
+                        </div>
+                    </div>
+                    <p class="message"><span>{{ n.otherEndUser.get_full_name }}</span> {{ n.message }}</p>
+                    {% if n.post != None %}
+                    <div class="post-content">
+                        <p class="content">
+                            {% if n.post.content|length > 110 %}
+                            {{ n.post.content|slice:":110" }}...
+                            {% else %}
+                            {{ n.post.content }}
+                            {% endif %}
+                        </p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            {% else %}
+            <div onclick="notiClick('{{ n.url }}')" class="single-noti not-read">
+                <img class="noti-avatar" src="{{ n.otherEndUser.profile.avatar.url }}">
+                <div class="noti-message">
+                    <div class="noti-setting">
+                        <img class="noti-setting-icon" src="{% static 'images/noti-setting-icon.svg' %}">
+                        <div class="noti-setting-options">
+                            <p class="mark-read">Mark Read</p>
+                            <p class="stop-noti">Stop receiving from {{ n.otherEndUser.get_full_name }}</p>
+                        </div>
+                    </div>
+                    <p class="message"><span>{{ n.otherEndUser.get_full_name }}</span> {{ n.message }}</p>
+                    {% if n.post != None %}
+                    <div class="post-content">
+                        <p class="content">
+                            {% if n.post.content|length > 110 %}
+                            {{ n.post.content|slice:":110" }}...
+                            {% else %}
+                            {{ n.post.content }}
+                            {% endif %}
+                        </p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="right">
+        
+    </div>
+</div>
+
+<script>
+    $(document).ready(() => {
+        let goToNotiUrl = true;
+        let clickOutsideOptions = true;
+        //Mark all as read
+       $("#mark-all-read").click(() => {
+            $(".single-noti").removeClass("not-read");
+            $(".single-noti").addClass("read");
+       });
+    });
+    //Close the noti options panel when clicking out.
+    $(document).mouseup(() => {
+        if (clickOutsideOptions)
+        {
+            $(".noti-setting-options").css("display", "none");
+        }
+    });
+
+    //Code for each single notifications
+    $(".single-noti").each((index) => {
+        let singleNoti = $(".single-noti").eq(index);
+        singleNoti.hover(() => {
+            singleNoti.find(".noti-setting-icon").toggle();
+        })
+        singleNoti.find(".noti-setting-icon").click(() => {
+            goToNotiUrl = false;
+            let notiSettingOptions = singleNoti.find(".noti-setting-options");
+            if (notiSettingOptions.css("display") == "none"){
+                $(".noti-setting-options").css("display", "none");
+                notiSettingOptions.css("display", "initial");
+            }
+            else {
+                notiSettingOptions.css("display", "none");
+            }
+        });
+    });
+
+    $(".noti-setting-icon").hover(() => {
+        clickOutsideOptions = false;
+    }, () => {
+        clickOutsideOptions = true;
+    });
+
+    //Prevent going to the notification url when clicking on the setting options and prevent closing the panel
+    $(".noti-setting-options p").hover(() => {
+        clickOutsideOptions = false;
+        goToNotiUrl = false;
+    }, () => {
+        clickOutsideOptions = true;
+        goToNotiUrl = true;
+    });
+    //Go to the url of the notification
+    function notiClick(url) {
+        if (url != "None" && goToNotiUrl) 
+            window.location.href = document.location.origin + "/" + url;
+    }
+
+</script>
+{% endblock %}

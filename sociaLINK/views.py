@@ -156,8 +156,8 @@ def home(request):
     for action in userDownActions:
         downPosts.append(action.post)
     #Only show 7 notifications    
-    if noti.count() >= 7:
-        noti = noti[:7]
+    if noti.count() >= 2:
+        noti = noti[:2]
     return render(request, 'home.html', {'Posts': Posts[:10], 'upPosts': upPosts,
                 'downPosts': downPosts, 'noti': noti})
 
@@ -223,9 +223,10 @@ def user_page(request, slug):
 
                             #Reformat the datetime for json objects
                             i['fields']['postedOn'] = str(Post.objects.get(pk = i['pk']).postedOn.strftime("%b %d, %Y, %I:%M %p")).replace('AM','a.m').replace('PM', 'p.m')
+                            
                             i['up'] = 'False'
                             i['down'] = 'False'
-                            #Add current users action with the posts to json
+                            #Add current user actions with the posts to json
                             post = Post.objects.get(pk = i['pk'])
                             for action in userUpActions:
                                 if post == action.post:
@@ -266,7 +267,7 @@ def user_page(request, slug):
                     jsonData = {"message": message,}
                     return HttpResponse(json.dumps(jsonData))
 
-            #Put all the informations needed here
+            #Put all the informations needed down here
             followers = 0
             for u in MyUser.objects.all():
                 if targetUser in u.following.all():
@@ -294,7 +295,7 @@ def search(request):
     nameSearch = SearchEngine()
     locationSearch = SearchEngine()
     query = location = ""
-    openTab = "by-name"
+    openTab = "by-name" #Get the current open search tab when reload the page
     if request.method == 'GET':
         if 'location' not in request.GET:
             query = request.GET.get("q", "")
@@ -327,3 +328,10 @@ def search(request):
 
     return render(request, "search.html", {'nameResult': nameSearch.result, 'locationResult': locationSearch.result,
      'query': query, 'location': location, 'openTab': openTab})
+
+@login_required(login_url = '/')
+def notifications(request):
+    noti = Notification.objects.filter(user = request.user).order_by('-createdAt')
+    request.user.newNotificationsNumber = 0 #Set the new notifications number to 0 if the user access the notifications page.
+    request.user.save()
+    return render(request, 'notifications.html', {'noti': noti})
