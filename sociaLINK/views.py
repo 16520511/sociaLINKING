@@ -1,10 +1,10 @@
 from django.shortcuts import render
 from django.http import HttpResponseRedirect, HttpResponse
 from django.urls import reverse
-from .forms import LoginForm, RegisterForm
+from .forms import LoginForm, RegisterForm, CreateGroupForm
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login, logout
-from .models import MyUser, Post, UserAction, Notification
+from .models import MyUser, Post, UserAction, Notification, MyGroup
 import datetime
 import json
 from django.core import serializers
@@ -355,3 +355,11 @@ def notifications(request):
             request.user.blockNoti.add(otherEndUser)
             request.user.save()
     return render(request, 'notifications.html', {'noti': noti})
+
+@login_required(login_url = '/')
+def create_group(request):
+    if request.method == 'POST':
+        title = request.POST.get('title', None)
+        description = request.POST.get('description', None)
+        MyGroup.objects.create(founder = request.user, title = title, description = description)
+    return render(request, 'create_group.html')

@@ -124,7 +124,7 @@
             </p>
             {% for n in noti %}
             {% if n.isRead %}
-            <div onclick="markRead('{{ n.url }}', '{{ n.id }}')" id="noti-{{ n.id }}" class="single-noti read">
+            <div onclick="markReadWhenClickNoti('{{ n.url }}', '{{ n.id }}')" id="noti-{{ n.id }}" class="single-noti read">
                 <img class="noti-avatar" src="{{ n.otherEndUser.profile.avatar.url }}">
                 <div class="noti-message">
                     <div class="noti-setting">
@@ -148,13 +148,13 @@
                 </div>
             </div>
             {% else %}
-            <div onclick="markRead('{{ n.url }}', '{{ n.id }}')" id="noti-{{ n.id }}" class="single-noti not-read">
+            <div onclick="markReadWhenClickNoti('{{ n.url }}', '{{ n.id }}')" id="noti-{{ n.id }}" class="single-noti not-read">
                 <img class="noti-avatar" src="{{ n.otherEndUser.profile.avatar.url }}">
                 <div class="noti-message">
                     <div class="noti-setting">
                         <img class="noti-setting-icon" src="{% static 'images/noti-setting-icon.svg' %}">
                         <div class="noti-setting-options">
-                            <p class="mark-read" onclick="markRead('None', '{{ n.id }}')">Mark Read</p>
+                            <p class="mark-read" onclick="markReadOnOption('{{ n.id }}')">Mark Read</p>
                             <p class="stop-noti" onclick="stopNoti('{{ n.otherEndUser.id }}')">Stop receiving from {{ n.otherEndUser.get_full_name }}</p>
                         </div>
                     </div>
@@ -242,8 +242,24 @@
         clickOutsideOptions = true;
         goToNotiUrl = true;
     });
+
+    $(".mark-read").click(() => {
+        $(".noti-setting-options").css("display", "none");
+    });
     //Go to the url of the notification and mark as read
-    function markRead(url, notiId) {
+    function markReadWhenClickNoti(url, notiId) {
+        $.ajax({
+            type: "post",
+            data: {
+                markRead: notiId,
+                csrfmiddlewaretoken: "{{ csrf_token }}",
+            }
+        });
+        if (url != "None" && goToNotiUrl)
+            window.location.href = document.location.origin + "/" + url;
+    }
+
+    function markReadOnOption(notiId) {
         $.ajax({
             type: "post",
             data: {
@@ -253,12 +269,11 @@
         });
         $(`#noti-${notiId}`).removeClass("not-read");
         $(`#noti-${notiId}`).addClass("read");
-        if (url != "None" && goToNotiUrl)
-            window.location.href = document.location.origin + "/" + url;
     }
 
     //Stop the notification coming from a specific user
     function stopNoti(otherEndUserId) {
+        $(".noti-setting-options").css("display", "none");
         $.ajax({
             type: "post",
             data: {

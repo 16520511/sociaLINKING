@@ -3,7 +3,7 @@ from django import forms
 from django.contrib.auth.forms import ReadOnlyPasswordHashField
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.contrib.auth.models import Group
-from .models import MyUser, MyUserManager, Profile, Post, UserAction, Notification
+from .models import MyUser, MyUserManager, Profile, Post, UserAction, Notification, MyGroup
 
 class UserCreationForm(forms.ModelForm):
     class Meta:
@@ -65,11 +65,18 @@ class UserAdmin(BaseUserAdmin):
     ordering = ('email', 'firstName')
     filter_horizontal = ()
 
+class MyGroupAdmin(admin.ModelAdmin):
+    class Meta:
+        model = MyGroup
+    
+    readonly_fields = ('member', 'banned', 'mod',)
+
 
 admin.site.register(MyUser, UserAdmin)
 admin.site.register(Profile)
 admin.site.register(Post)
 admin.site.register(UserAction)
 admin.site.register(Notification)
+admin.site.register(MyGroup, MyGroupAdmin)
 
 admin.site.unregister(Group)

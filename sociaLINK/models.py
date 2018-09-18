@@ -2,6 +2,7 @@ from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 from django.core.exceptions import ValidationError
 from datetime import datetime
+import random
 
 class MyUserManager(BaseUserManager):
     def create_user(self, email, password, firstName, lastName, age, gender = 'Male'):
@@ -138,6 +139,36 @@ class Profile(models.Model):
     def __str__(self):
         return f'{self.user.email} Profile'
 
+class MyGroup(models.Model):
+    founder = models.ForeignKey(MyUser, on_delete = models.SET_NULL, null = True)
+    uniqueId = models.BigIntegerField(blank = True, null = True)
+    mod = models.ManyToManyField(MyUser, related_name = 'mods', blank = True)
+    member = models.ManyToManyField(MyUser, related_name = 'members', blank = True)
+    banned = models.ManyToManyField(MyUser, related_name = 'banned', blank = True)
+    title = models.CharField(max_length = 100)
+    description = models.CharField(max_length = 300)
+
+    def __str__(self):
+        return f'Group {self.title}'
+
+#Set the founder also a member of this group and create a unique Id for the url
+def group_created(*args, **kwargs):
+    instance = kwargs['instance']
+    if kwargs['created']:
+        founder = instance.founder
+        instance.member.add(founder)
+        #Create a random Id and check it agaisn all taken unique Id
+        takenUniqueId = []
+        for group in MyGroup.objects.all():
+            takenUniqueId.append(group.uniqueId)
+        randomId = random.randrange(1000000, 9999999)
+        while randomId in takenUniqueId:
+            randomId = random.randrange(1000000, 9999999)
+        instance.uniqueId = randomId
+        instance.save()
+
+models.signals.post_save.connect(group_created, sender = MyGroup)
+
 class Post(models.Model):
 
     PRIVACY = (
@@ -146,6 +177,7 @@ class Post(models.Model):
     )
     user = models.ForeignKey(MyUser, on_delete = models.CASCADE)
     userAction = models.ManyToManyField(MyUser, through = 'UserAction', related_name = 'action')
+    group = models.ForeignKey(MyGroup, on_delete = models.CASCADE, null = True, blank = True)
 
     content = models.TextField(max_length = 500)
     postedOn = models.DateTimeField(auto_now_add = True)
@@ -249,3 +281,5 @@ def notification_created(*args, **kwargs):
         instance.user.save()
 
 models.signals.post_save.connect(notification_created, sender = Notification)
+
+    

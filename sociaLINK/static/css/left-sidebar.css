@@ -1,0 +1,17 @@
+.left-sidebar {
+    background-color: white;
+    border: 1px solid #ccc;
+    padding: 10px;
+    margin-top: 10px;
+    text-align: center;
+}
+.create-btn {
+    border-radius: 0px;
+    border: 2px solid orangered;
+    background-color: inherit;
+    color: orangered;
+}
+    .create-btn:hover {
+        background-color: orangered;
+        color: white;
+    }

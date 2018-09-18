@@ -51,3 +51,8 @@ class LoginForm(forms.Form):
         if not user:
             raise forms.ValidationError('Login Failed!')
         return self.cleaned_data
+
+class CreateGroupForm(forms.Form):
+    title = forms.CharField(label = 'Group Title', max_length = 100)
+    description = forms.CharField(label = 'Description', max_length = 300)
+    

@@ -34,13 +34,6 @@
         background-color: rgb(55, 112, 131);
     }
 
-.left {
-    grid-column: 1;
-}
-.right {
-    grid-column: 3;
-}
-
     .right-section {
         background-color: white;
         padding: 10px;
